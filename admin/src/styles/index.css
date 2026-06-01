@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Inter", ui-sans-serif;
+
+  /* Admin interface colors */
+  --color-admin-800: hsl(230, 25%, 15%);
+  --color-admin-900: hsl(230, 25%, 10%);
+  --color-admin-950: hsl(230, 25%, 5%);
+
+  --color-accent-blue:  hsl(210, 100%, 55%);
+  --color-accent-amber: hsl(38,  92%,  50%);
+  --color-accent-rose:  hsl(343, 90%,  55%);
+  --color-accent-green: hsl(157, 69%,  44%);
+  --color-accent-indigo:hsl(239, 84%,  67%);
+
+  /* Brand tokens (match frontend) */
+  --color-brand-navy:   #0A1F44;
+  --color-brand-orange: #FF7A00;
+  --color-brand-green:  #00B894;
+
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0);    }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0);    }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+  --animate-slide-in: slide-in-left 0.25s ease both;
+  --animate-fade-up:  fade-up 0.3s ease both;
+}
+
+@layer base {
+  html, body { background-color: hsl(230, 25%, 5%); }
+  * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }
+}
+
+/* ── Glassmorphic panel ── */
+.admin-card {
+  background: rgba(17, 22, 40, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0.875rem;
+  transition: border-color 0.2s, background 0.2s;
+}
+.admin-card:hover {
+  background: rgba(22, 28, 50, 0.68);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Sidebar ── */
+.admin-sidebar {
+  background: rgba(8, 10, 20, 0.97);
+  border-right: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+/* ── Stat card accent top border ── */
+.stat-blue   { border-top: 2px solid hsl(210, 100%, 55%); }
+.stat-green  { border-top: 2px solid #00B894; }
+.stat-amber  { border-top: 2px solid hsl(38, 92%, 50%); }
+.stat-rose   { border-top: 2px solid hsl(343, 90%, 55%); }
+
+/* ── Table rows ── */
+.admin-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+}
+.admin-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* ── Pill badge helpers ── */
+.badge-green  { background: rgba(0,184,148,.12); color:#00B894; border:1px solid rgba(0,184,148,.25); }
+.badge-amber  { background: rgba(251,191,36,.10); color:#FBBF24; border:1px solid rgba(251,191,36,.25); }
+.badge-rose   { background: rgba(244,63,94,.10);  color:#F43F5E; border:1px solid rgba(244,63,94,.25); }
+.badge-blue   { background: rgba(59,130,246,.10); color:#60A5FA; border:1px solid rgba(59,130,246,.25); }
+.badge-indigo { background: rgba(99,102,241,.10); color:#818CF8; border:1px solid rgba(99,102,241,.25); }
+.badge-slate  { background: rgba(100,116,139,.10);color:#94A3B8; border:1px solid rgba(100,116,139,.25); }
+
+/* ── Pulse dot ── */
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* ── Sidebar nav active item ── */
+.nav-active {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60A5FA;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+.nav-inactive {
+  color: #64748b;
+}
+.nav-inactive:hover {
+  background: rgba(255,255,255,0.04);
+  color: #cbd5e1;
+}
+
