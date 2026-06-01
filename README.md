@@ -1,14 +1,14 @@
-# 🏆 Bharat AI Olympiad (BAIO) — Comprehensive Full-Stack Architecture & Internship Progress Report
+# Bharat AI Olympiad (BAIO) — Comprehensive Full-Stack Architecture & Internship Progress Report
 
 Welcome to the definitive master documentation and system design manual for the **Bharat AI Olympiad (BAIO)** portal. This repository orchestrates a robust, highly resilient, and modern full-stack web ecosystem designed to support secure digital registrations, candidate benchmarking, physical exam room allocations, and national ranking algorithms for students across India.
 
 ---
 
-## 🗺️ 1. Complete System Architecture & HLD
+## 1. Complete System Architecture & HLD
 
 The BAIO system is structured as a high-availability, decoupled multi-tier architecture designed to survive extreme registration traffic spikes.
 
-### 🌐 Detailed 3-Tier Physical Architecture Diagram
+### Detailed 3-Tier Physical Architecture Diagram
 
 ```mermaid
 graph TD
@@ -30,9 +30,9 @@ graph TD
 
 ---
 
-## 🔄 2. Core Workflows & System Sequence Designs
+## 2. Core Workflows & System Sequence Designs
 
-### 🎟️ Sequence Diagram: Student Registration & Proctor Allocation
+### Sequence Diagram: Student Registration & Proctor Allocation
 
 This diagram illustrates the secure transaction lifecycle, database writes, and automated offline center seat mapping.
 
@@ -69,7 +69,7 @@ sequenceDiagram
 
 ---
 
-## 🗄️ 3. Low-Level Database Schema Design (ERD)
+##  3. Low-Level Database Schema Design (ERD)
 
 The system leverages MongoDB for flexible document tracking, mapped via strictly typed Mongoose models.
 
@@ -129,7 +129,7 @@ erDiagram
 
 ---
 
-## 📑 4. Module Functionality & Feature Matrix
+## 4. Module Functionality & Feature Matrix
 
 The full-stack codebase is organized into distinct functional scopes to serve three unique user groups:
 
@@ -147,11 +147,11 @@ The full-stack codebase is organized into distinct functional scopes to serve th
 
 ---
 
-## 📈 5. Internship Progress Report: Accomplishments to Date
+##  5. Internship Progress Report: Accomplishments to Date
 
 Our pair programming team (collaborating with **Antigravity AI**, **Cursor**, and **21st.dev**) completed major engineering breakthroughs to stabilize the core frontend and backend paths.
 
-### 🌟 Milestones Achieved & Code Improvements
+###  Milestones Achieved & Code Improvements
 
 > [!TIP]
 > **Performance Optimization:** Reverting complex and unneeded modules saved hundreds of kilobytes, making the application extremely light and fast to render on mobile networks.
@@ -174,7 +174,7 @@ Our pair programming team (collaborating with **Antigravity AI**, **Cursor**, an
 
 ---
 
-## 📅 6. Forward Engineering Roadmap (Next Week's Action Plan)
+##  6. Forward Engineering Roadmap (Next Week's Action Plan)
 
 The next developmental iteration focuses on security hardening, load balancing, caching integration, and mock test administration.
 
@@ -189,23 +189,23 @@ gantt
     System Stress Testing (10k user simulation)  : 1d
 ```
 
-### 🎯 Detailed Milestones for Coming Week
+### Detailed Milestones for Coming Week
 
-#### 🖨️ 1. Admit Card PDF Engine (2 Days)
+####  1. Admit Card PDF Engine (2 Days)
 *   Integrate a Node-based backend PDF canvas generator (`pdfkit` or `puppeteer`) to dynamically output high-fidelity printable Admit Cards.
 *   Embed a secure QR code encoding signed JWT coordinates (Student ID + Allocation Center ID) for physical room check-ins.
 
-#### ⚡ 2. Redis Session and Capacity Caching (2 Days)
+####  2. Redis Session and Capacity Caching (2 Days)
 *   Integrate a Redis cache layer for the most expensive endpoints (such as `/api/v1/announcements` and `/api/v1/centers/capacity`).
 *   Establish write-aside invalidation schemes to ensure room seats are always updated as soon as bookings occur.
 
-#### 📍 3. KNN Geolocation Proctor Allocation Algorithm (2 Days)
+####  3. KNN Geolocation Proctor Allocation Algorithm (2 Days)
 *   Implement a K-Nearest Neighbors spatial algorithm in Node.js to match candidate coordinates against registered physical proctoring centers in real-time.
 *   Automatically select the nearest center within maximum limits, gracefully cascading to the next closest secondary hub if filled.
 
-#### 🧪 4. Load & Stress Simulation (1 Day)
+####  4. Load & Stress Simulation (1 Day)
 *   Run intensive stress-testing script scripts simulating 10,000 concurrent API transactions using `Artillery.io`.
 *   Benchmark connection pools to optimize MongoDB sharding and HAProxy request-queue lengths.
 
 ---
-*Developed with ❤️ by the Bharat AI Olympiad Engineering Team.*
+*Developed with ❤️ by the BAIO Intern (Mohit)*
