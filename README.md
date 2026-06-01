@@ -1,6 +1,6 @@
 # Bharat AI Olympiad (BAIO) — Comprehensive Full-Stack Architecture & Internship Progress Report
 
-Welcome to the definitive master documentation and system design manual for the **Bharat AI Olympiad (BAIO)** portal. This repository orchestrates a robust, highly resilient, and modern full-stack web ecosystem designed to support secure digital registrations, candidate benchmarking, physical exam room allocations, and national ranking algorithms for students across India.
+Welcome to the documentation and system design manual for the **Bharat AI Olympiad (BAIO)** portal. This repository orchestrates a robust, highly resilient, and modern full-stack web ecosystem designed to support secure digital registrations, candidate benchmarking, physical exam room allocations, and national ranking algorithms for students across India.
 
 ---
 
