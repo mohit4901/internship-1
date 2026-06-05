@@ -568,6 +568,7 @@ function SchoolsPage() {
 
   // Participants modal state
   const [selectedSchoolForParticipants, setSelectedSchoolForParticipants] = useState(null);
+  const [selectedSchoolForDetails, setSelectedSchoolForDetails] = useState(null);
   const [schoolParticipants, setSchoolParticipants] = useState([]);
   const [loadingParticipants, setLoadingParticipants] = useState(false);
   const [participantsQuery, setParticipantsQuery] = useState('');
@@ -634,7 +635,16 @@ function SchoolsPage() {
       <AdminTable loading={loading} headers={['School Name', 'Board', 'City', 'State', 'Students', 'Verified', 'Email', 'Actions']}>
         {filtered.map(s => (
           <tr key={s._id}>
-            <td className="py-3.5 pr-4 font-semibold text-slate-100 max-w-[200px] truncate">{s.name}</td>
+            <td className="py-3.5 pr-4 max-w-[200px] truncate">
+              <button
+                onClick={() => setSelectedSchoolForDetails(s)}
+                className="text-left font-bold text-[#001F5E] hover:text-brand-orange hover:underline cursor-pointer flex items-center gap-1.5"
+                title="Click to view full details"
+              >
+                <Eye className="w-3.5 h-3.5 text-slate-405 shrink-0" />
+                <span>{s.name}</span>
+              </button>
+            </td>
             <td className="py-3.5 pr-4">
               <span className="badge-blue inline-block px-2 py-0.5 rounded-full text-[10px] font-bold">{s.board}</span>
             </td>
@@ -669,6 +679,137 @@ function SchoolsPage() {
           </tr>
         ))}
       </AdminTable>
+
+      {/* School Full Details Modal */}
+      {selectedSchoolForDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white border-4 border-brand-navy rounded-3xl p-6 max-w-2xl w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setSelectedSchoolForDetails(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-650 font-bold text-lg cursor-pointer"
+            >
+              ✕
+            </button>
+            
+            <div className="flex items-center gap-2 mb-3">
+              <School className="w-5 h-5 text-brand-orange" />
+              <h3 className="text-base font-black text-brand-navy">School Profile Details</h3>
+            </div>
+
+            <div className="border-b border-slate-200 pb-4 mb-4">
+              <h4 className="text-sm font-bold text-slate-800">{selectedSchoolForDetails.name}</h4>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <span className="badge-blue px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                  Board: {selectedSchoolForDetails.board}
+                </span>
+                <span className="badge-indigo px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                  Affiliation: {selectedSchoolForDetails.affiliationNumber}
+                </span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                  selectedSchoolForDetails.isVerified ? 'badge-green' : 'badge-amber'
+                }`}>
+                  Status: {selectedSchoolForDetails.isVerified ? 'Verified' : 'Pending'}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Section 1: Institution Info */}
+              <div className="space-y-3">
+                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-1">
+                  Institution Info
+                </h5>
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="text-slate-400 font-bold">Principal Name:</span>
+                    <p className="text-slate-850 font-semibold">{selectedSchoolForDetails.principalName || '—'}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold">Primary Email:</span>
+                    <p className="text-slate-850 font-semibold">{selectedSchoolForDetails.contactEmail || '—'}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold">Primary Phone:</span>
+                    <p className="text-slate-850 font-semibold font-mono">{selectedSchoolForDetails.contactPhone || '—'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Coordinator Details */}
+              <div className="space-y-3">
+                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-1">
+                  Coordinator Details
+                </h5>
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <span className="text-slate-400 font-bold">Coordinator Name:</span>
+                    <p className="text-slate-855 font-semibold">{selectedSchoolForDetails.coordinator?.name || '—'}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold">Coordinator Email:</span>
+                    <p className="text-slate-855 font-semibold">{selectedSchoolForDetails.coordinator?.email || '—'}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-bold">Coordinator Phone:</span>
+                    <p className="text-slate-855 font-semibold font-mono">{selectedSchoolForDetails.coordinator?.phone || '—'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Address Details */}
+              <div className="space-y-3 md:col-span-2">
+                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-1">
+                  Geographical Location
+                </h5>
+                <div className="space-y-2.5 text-xs text-slate-800 font-semibold">
+                  <div>
+                    <span className="text-slate-400 font-bold">Street Address:</span>
+                    <p>{selectedSchoolForDetails.address?.street || '—'}</p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div>
+                      <span className="text-slate-400 font-bold">City:</span>
+                      <p>{selectedSchoolForDetails.address?.city || '—'}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold">State:</span>
+                      <p>{selectedSchoolForDetails.address?.state || '—'}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold">ZIP Code:</span>
+                      <p className="font-mono">{selectedSchoolForDetails.address?.zip || '—'}</p>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-bold">Country:</span>
+                      <p>{selectedSchoolForDetails.address?.country || 'India'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-6 pt-4 border-t border-slate-200">
+              <button
+                onClick={() => {
+                  setSelectedSchoolForParticipants(selectedSchoolForDetails);
+                  setSelectedSchoolForDetails(null);
+                }}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_2px_0px_0px_#1e3a8a] border-2 border-brand-navy"
+              >
+                <ClipboardList className="w-4 h-4" />
+                <span>View Registered Students ({selectedSchoolForDetails.registeredStudentsCount || 0})</span>
+              </button>
+              
+              <button
+                onClick={() => setSelectedSchoolForDetails(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer text-center"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Verification Modal */}
       {verifySchoolItem && (
@@ -784,7 +925,7 @@ function SchoolsPage() {
                     <tr key={p._id}>
                       <td className="py-2.5 pr-4 font-semibold text-slate-800">{p.name}</td>
                       <td className="py-2.5 pr-4 text-slate-600">Class {p.class}</td>
-                      <td className="py-2.5 pr-4 text-slate-505">{p.section || '—'}</td>
+                      <td className="py-2.5 pr-4 text-slate-555">{p.section || '—'}</td>
                       <td className="py-2.5 pr-4 font-mono text-[10px] text-slate-650">{p.rollNo || '—'}</td>
                       <td className="py-2.5 pr-4 text-slate-550">{p.gender || '—'}</td>
                       <td className="py-2.5 pr-4">
