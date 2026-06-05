@@ -1,13 +1,114 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { olympiadAPI, registerForOlympiad, getMyRegistrations } from '../services';
-import { Calendar, Clock, Trophy, ShieldAlert, RefreshCw, Sparkles, GraduationCap, Cpu, Layers, ArrowRight, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { olympiadAPI } from '../services';
+import { Calendar, Clock, Trophy, ShieldAlert, RefreshCw, Sparkles, GraduationCap, Cpu, Layers, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+function renderIllustration(index) {
+  const colors = [
+    { name: 'green',   grad: 'from-emerald-600 to-teal-850',      stroke: '#34d399', glow: '#059669' },
+    { name: 'orange',  grad: 'from-orange-500 to-amber-700',      stroke: '#fb923c', glow: '#ea580c' },
+    { name: 'indigo',  grad: 'from-indigo-600 to-blue-900',       stroke: '#818cf8', glow: '#4f46e5' },
+    { name: 'purple',  grad: 'from-fuchsia-600 to-violet-900',    stroke: '#e879f9', glow: '#c084fc' },
+    { name: 'teal',    grad: 'from-cyan-500 to-teal-850',         stroke: '#22d3ee', glow: '#0891b2' },
+    { name: 'yellow',  grad: 'from-amber-400 to-orange-600',      stroke: '#fbbf24', glow: '#d97706' },
+    { name: 'rose',    grad: 'from-rose-500 to-pink-900',         stroke: '#f43f5e', glow: '#db2777' },
+  ];
+  
+  const theme = colors[index % colors.length];
+  
+  return (
+    <div className={`absolute inset-0 w-full h-full bg-gradient-to-br ${theme.grad} opacity-95 transition-transform duration-500 ease-in-out group-hover:scale-110 overflow-hidden`}>
+      <svg className="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Subtle grid lines */}
+        <path d="M 0 50 L 400 50 M 0 100 L 400 100 M 0 150 L 400 150 M 0 200 L 400 200 M 0 250 L 400 250 M 0 300 L 400 300 M 0 350 L 400 350" stroke={theme.stroke} strokeWidth="0.5" strokeDasharray="3 6" />
+        <path d="M 50 0 L 50 400 M 100 0 L 100 400 M 150 0 L 150 400 M 200 0 L 200 400 M 250 0 L 250 400 M 300 0 L 300 400 M 350 0 L 350 400" stroke={theme.stroke} strokeWidth="0.5" strokeDasharray="3 6" />
+        
+        {/* Dynamic Vector Shapes based on index */}
+        {index % 7 === 0 && (
+          <>
+            <circle cx="200" cy="200" r="60" stroke={theme.stroke} strokeWidth="2" />
+            <circle cx="200" cy="200" r="10" fill={theme.stroke} />
+            <line x1="200" y1="200" x2="120" y2="120" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="200" y1="200" x2="280" y2="120" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="200" y1="200" x2="120" y2="280" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="200" y1="200" x2="280" y2="280" stroke={theme.stroke} strokeWidth="2" />
+            <circle cx="120" cy="120" r="15" fill={theme.stroke} />
+            <circle cx="280" cy="120" r="15" fill={theme.stroke} />
+            <circle cx="120" cy="280" r="15" fill={theme.stroke} />
+            <circle cx="280" cy="280" r="15" fill={theme.stroke} />
+          </>
+        )}
+        
+        {index % 7 === 1 && (
+          <>
+            <rect x="80" y="80" width="100" height="60" rx="8" stroke={theme.stroke} strokeWidth="2" fill="rgba(0,0,0,0.2)" />
+            <rect x="220" y="80" width="100" height="60" rx="8" stroke={theme.stroke} strokeWidth="2" fill="rgba(0,0,0,0.2)" />
+            <line x1="130" y1="140" x2="200" y2="220" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="270" y1="140" x2="200" y2="220" stroke={theme.stroke} strokeWidth="2" />
+            <polygon points="200,200 240,280 160,280" stroke={theme.stroke} strokeWidth="2" fill="rgba(0,0,0,0.2)" />
+          </>
+        )}
+        
+        {index % 7 === 2 && (
+          <>
+            <circle cx="200" cy="200" r="100" stroke={theme.stroke} strokeWidth="1" strokeDasharray="5 5" />
+            <circle cx="200" cy="200" r="80" stroke={theme.stroke} strokeWidth="2" />
+            <circle cx="200" cy="200" r="50" stroke={theme.stroke} strokeWidth="3" />
+            <circle cx="200" cy="200" r="20" fill={theme.stroke} />
+            <line x1="200" y1="50" x2="200" y2="350" stroke={theme.stroke} strokeWidth="1.5" />
+            <line x1="50" y1="200" x2="350" y2="200" stroke={theme.stroke} strokeWidth="1.5" />
+          </>
+        )}
+
+        {index % 7 === 3 && (
+          <>
+            <rect x="50" y="50" width="300" height="300" rx="16" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="90" y1="100" x2="310" y2="100" stroke={theme.stroke} strokeWidth="3" />
+            <line x1="90" y1="150" x2="260" y2="150" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="90" y1="200" x2="290" y2="200" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="90" y1="250" x2="210" y2="250" stroke={theme.stroke} strokeWidth="2" />
+            <line x1="90" y1="300" x2="270" y2="300" stroke={theme.stroke} strokeWidth="2" />
+          </>
+        )}
+
+        {index % 7 === 4 && (
+          <>
+            <polygon points="200,60 320,130 320,270 200,340 80,270 80,130" stroke={theme.stroke} strokeWidth="2" fill="rgba(0,0,0,0.1)" />
+            <polygon points="200,100 290,150 290,250 200,300 110,250 110,150" stroke={theme.stroke} strokeWidth="1.5" />
+            <circle cx="200" cy="200" r="30" fill={theme.stroke} />
+          </>
+        )}
+
+        {index % 7 === 5 && (
+          <>
+            <polygon points="200,80 320,300 80,300" stroke={theme.stroke} strokeWidth="3" fill="rgba(0,0,0,0.1)" />
+            <circle cx="200" cy="80" r="12" fill={theme.stroke} />
+            <circle cx="320" cy="300" r="12" fill={theme.stroke} />
+            <circle cx="80" cy="300" r="12" fill={theme.stroke} />
+            <line x1="200" y1="170" x2="200" y2="300" stroke={theme.stroke} strokeWidth="1.5" />
+            <circle cx="200" cy="170" r="8" fill="white" />
+          </>
+        )}
+
+        {index % 7 === 6 && (
+          <>
+            <path d="M 50 200 Q 125 75, 200 200 T 350 200" stroke={theme.stroke} strokeWidth="3" fill="none" />
+            <path d="M 50 200 Q 125 325, 200 200 T 350 200" stroke={theme.stroke} strokeWidth="1.5" strokeDasharray="4 4" fill="none" />
+            <circle cx="125" cy="137" r="10" fill={theme.stroke} />
+            <circle cx="275" cy="262" r="10" fill={theme.stroke} />
+          </>
+        )}
+      </svg>
+      {/* Decorative ambient glowing spot inside card */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] rounded-full opacity-35 blur-3xl pointer-events-none" style={{ backgroundColor: theme.glow }} />
+    </div>
+  );
+}
+
 export default function OlympiadsPage() {
-  const { isAuthenticated, isStudent } = useAuth();
+  const { isAuthenticated, isSchool } = useAuth();
   const [olympiads, setOlympiads] = useState([]);
-  const [registeredOlympiadIds, setRegisteredOlympiadIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -90,34 +191,9 @@ export default function OlympiadsPage() {
     }
   };
 
-  const loadRegistrations = useCallback(async () => {
-    if (isAuthenticated && isStudent) {
-      try {
-        const res = await getMyRegistrations();
-        const list = res?.data?.data?.registrations || res?.data?.registrations || [];
-        const ids = list.map(r => r.olympiadId?._id || r.olympiadId);
-        setRegisteredOlympiadIds(ids);
-      } catch (err) {
-        console.warn('Failed to load student registrations', err);
-      }
-    }
-  }, [isAuthenticated, isStudent]);
-
   useEffect(() => {
     fetchOlympiads();
-    loadRegistrations();
-  }, [loadRegistrations]);
-
-  const handleRegister = async (olympiadId, title) => {
-    if (!window.confirm(`Are you sure you want to register for "${title}"?`)) return;
-    try {
-      await registerForOlympiad({ olympiadId });
-      alert(`Successfully registered for "${title}"!`);
-      loadRegistrations();
-    } catch (err) {
-      alert(err?.message || 'Failed to register.');
-    }
-  };
+  }, []);
 
   const getReadableDate = (dateStr) => {
     try {
@@ -128,217 +204,174 @@ export default function OlympiadsPage() {
     }
   };
 
-  // Dynamic aesthetic helper settings for cards depending on track
   const getCategoryDetails = (category) => {
     switch (category) {
       case 'Junior':
         return {
-          banner: 'from-brand-navy via-slate-900 to-brand-green/85',
-          glow: 'glow-green hover:shadow-brand-green/10',
-          badge: 'bg-brand-green/10 text-brand-green border-brand-green/20',
-          icon: <GraduationCap className="w-8 h-8 text-brand-green animate-pulse-slow" />,
-          grades: 'Grades 6th to 8th'
+          icon: <GraduationCap className="w-5 h-5 text-white" />,
+          grades: 'Grades 6th to 9th'
         };
       case 'Senior':
         return {
-          banner: 'from-brand-navy via-slate-900 to-brand-orange/85',
-          glow: 'glow-orange hover:shadow-brand-orange/10',
-          badge: 'bg-brand-orange/10 text-brand-orange border-brand-orange/20',
-          icon: <Cpu className="w-8 h-8 text-brand-orange animate-pulse-slow" />,
-          grades: 'Grades 9th to 12th'
+          icon: <Cpu className="w-5 h-5 text-white" />,
+          grades: 'Grades 10th to 12th'
         };
       case 'Masters':
       default:
         return {
-          banner: 'from-brand-navy via-slate-900 to-indigo-600/80',
-          glow: 'glow-navy hover:shadow-indigo-600/10',
-          badge: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-          icon: <Layers className="w-8 h-8 text-indigo-400 animate-pulse-slow" />,
+          icon: <Layers className="w-5 h-5 text-white" />,
           grades: 'College & Undergrad'
         };
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 md:py-20 space-y-12">
-      
-      {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 text-left border-b border-slate-900/60 pb-8 relative">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-1.5 bg-brand-green/10 text-brand-green border border-brand-green/20 rounded-lg px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
-            <Trophy className="w-3.5 h-3.5" />
-            <span>Active Catalogs</span>
-          </div>
-          <h1 className="font-heading font-extrabold text-4xl md:text-5xl text-white">
-            BAIO Olympiad tracks
-          </h1>
-          <p className="text-slate-400 text-sm md:text-base max-w-xl font-light leading-relaxed">
-            Challenge your limits by registering for India's standard-setting cognitive assessments. Choose your category to begin seat-allocation.
-          </p>
-        </div>
-
-        <button 
-          onClick={fetchOlympiads}
-          className="self-start md:self-auto flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-900 border border-slate-800/80 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Sync Database</span>
-        </button>
-      </div>
-
-      {/* ── Status Indicator (Database Offline Warning) ── */}
-      {error && (
-        <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-start gap-3 text-left">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shrink-0">
-            <ShieldAlert className="w-5 h-5 text-amber-500" />
-          </div>
-          <div className="space-y-0.5">
-            <h4 className="text-sm font-bold text-slate-200">Database Connection Stub Mode</h4>
-            <p className="text-xs text-slate-400 leading-relaxed font-light">
-              Could not retrieve the remote database catalog list. Showing pre-allocated BAIO official structural divisions.
+    <div className="bg-brand-cream min-h-screen selection:bg-brand-orange selection:text-white pb-24 pt-16 md:pt-28">
+      <div className="max-w-7xl mx-auto px-6 space-y-12">
+        
+        {/* ── Page Header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 text-left border-b border-slate-200 pb-6 relative">
+          <div className="space-y-3">
+            <span className="brand-badge brand-badge-navy">
+              Active Catalogs
+            </span>
+            <h1 className="font-heading font-black text-4xl md:text-5xl text-brand-navy">
+              BAIO Olympiad Tracks
+            </h1>
+            <p className="text-slate-650 text-sm md:text-base max-w-xl font-semibold leading-relaxed">
+              Challenge your limits by enrolling your school in India's standard-setting cognitive assessments.
             </p>
           </div>
-        </div>
-      )}
 
-      {/* ── Loading Skeleton Grid ── */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="glass-card rounded-3xl overflow-hidden border border-slate-900 h-[500px] flex flex-col justify-between animate-pulse">
-              <div className="h-44 bg-slate-900/80" />
-              <div className="p-6 space-y-4 flex-1">
-                <div className="w-24 h-5 bg-slate-800 rounded-lg" />
-                <div className="w-3/4 h-7 bg-slate-800 rounded-lg" />
-                <div className="space-y-2 pt-2">
-                  <div className="w-full h-4 bg-slate-800 rounded-lg" />
-                  <div className="w-5/6 h-4 bg-slate-800 rounded-lg" />
-                </div>
-              </div>
-              <div className="p-6 border-t border-slate-900/60 flex items-center justify-between">
-                <div className="w-20 h-5 bg-slate-800 rounded-lg" />
-                <div className="w-28 h-10 bg-slate-800 rounded-xl" />
-              </div>
+          <button 
+            onClick={fetchOlympiads}
+            className="self-start md:self-auto flex items-center gap-1.5 text-xs text-brand-navy font-bold hover:bg-slate-100 bg-white border border-brand-navy/20 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer shadow-sm hover:border-brand-navy/40"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Sync Database</span>
+          </button>
+        </div>
+
+        {/* ── Status Indicator (Database Connection Warning) ── */}
+        {error && (
+          <div className="bg-amber-50 border border-amber-300 rounded-3xl px-6 py-5 flex items-start gap-4 shadow-sm text-left animate-fade-in">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 border border-amber-300">
+              <ShieldAlert className="w-5 h-5 text-amber-600" />
             </div>
-          ))}
-        </div>
-      ) : (
-        /* ── Olympiads Grid ── */
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {olympiads.map((item) => {
-            const track = getCategoryDetails(item.category);
-            return (
-              <div 
-                key={item._id} 
-                className={`glass-card rounded-3xl overflow-hidden border border-white/5 flex flex-col justify-between transition-all duration-300 relative ${track.glow}`}
-              >
-                
-                {/* ── Card Top Header (Banner Graphic) ── */}
-                <div className={`h-44 w-full bg-gradient-to-br ${track.banner} relative p-6 flex flex-col justify-between overflow-hidden border-b border-slate-900/50`}>
-                  
-                  {/* Subtle Grid Overlay on Banner */}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.18),rgba(255,255,255,0))] opacity-40" />
+            <div>
+              <p className="text-sm font-extrabold text-amber-900 uppercase tracking-wide">Database Connection Stub Mode</p>
+              <p className="text-xs text-amber-700 mt-1 leading-relaxed font-semibold">
+                Could not retrieve the remote database catalog list. Showing pre-allocated BAIO official structural divisions.
+              </p>
+            </div>
+          </div>
+        )}
 
-                  {/* Brand and category icons */}
-                  <div className="flex justify-between items-start relative z-10">
-                    <div className="inline-flex items-center gap-1 bg-slate-950/80 px-2.5 py-1 rounded-md border border-white/5 text-[9px] font-bold text-slate-300 uppercase tracking-widest leading-none">
-                      <Sparkles className="w-2.5 h-2.5 text-brand-orange animate-pulse" />
-                      <span>{item.status || 'Active'}</span>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-slate-950/70 flex items-center justify-center border border-white/5">
-                      {track.icon}
-                    </div>
-                  </div>
-
-                  {/* Division Badge */}
-                  <div className="relative z-10 text-left">
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider border leading-none ${track.badge}`}>
-                      {track.grades}
-                    </span>
-                  </div>
-
+        {/* ── Loading Skeleton Grid ── */}
+        {loading ? (
+          <div className="flex flex-wrap justify-center gap-8">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="w-full max-w-[360px] h-[440px] bg-white rounded-3xl border border-slate-200 flex flex-col justify-between p-6">
+                <div className="h-12 w-12 rounded-full bg-slate-200" />
+                <div className="space-y-4">
+                  <div className="w-20 h-4 bg-slate-200 rounded" />
+                  <div className="w-3/4 h-8 bg-slate-200 rounded" />
+                  <div className="w-1/2 h-4 bg-slate-200 rounded" />
                 </div>
-
-                {/* ── Card Body Details ── */}
-                <div className="p-6 flex-1 flex flex-col justify-between space-y-6 text-left relative">
-                  
-                  <div className="space-y-3">
-                    <h3 className="font-heading font-extrabold text-xl text-slate-100 leading-snug">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-400 text-xs sm:text-sm leading-relaxed font-light line-clamp-4">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  {/* Timeline Indicators */}
-                  <div className="space-y-2 pt-3 border-t border-slate-900/40">
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <Calendar className="w-4 h-4 text-brand-green" />
-                      <span>Exam Date: <strong className="text-slate-200">{getReadableDate(item.timeline?.examDate || item.examDate)}</strong></span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <Clock className="w-4 h-4 text-brand-orange" />
-                      <span>Closing: <strong className="text-slate-200">{getReadableDate(item.timeline?.registrationEnd || item.registrationLastDate)}</strong></span>
-                    </div>
-                  </div>
-
+                <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
+                  <div className="w-20 h-6 bg-slate-200 rounded" />
+                  <div className="w-28 h-10 bg-slate-200 rounded-xl" />
                 </div>
-
-                {/* ── Card Footer Action Bar ── */}
-                <div className="p-6 border-t border-slate-900/60 bg-slate-950/20 flex items-center justify-between gap-4">
-                  <div className="text-left">
-                    <p className="text-[10px] text-slate-500 font-bold uppercase leading-none">Registration Fee</p>
-                    <p className="text-lg font-extrabold text-white font-heading mt-1">
-                      {item.currency === 'INR' || !item.currency ? '₹' : item.currency + ' '}
-                      {item.registrationFee}
-                    </p>
-                  </div>
-                  
-                  {isAuthenticated ? (
-                    isStudent ? (
-                      registeredOlympiadIds.includes(item._id) ? (
-                        <div className="bg-brand-green/10 border border-brand-green/20 text-brand-green font-bold text-xs px-5 py-3 rounded-xl flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Registered</span>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => handleRegister(item._id, item.title)}
-                          className="bg-brand-orange hover:bg-brand-orange hover:shadow-lg hover:shadow-brand-orange/20 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all duration-200 flex items-center gap-1.5 group cursor-pointer"
-                        >
-                          <span>Register Now</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                        </button>
-                      )
-                    ) : (
-                      <div className="bg-slate-900 border border-slate-850 text-slate-500 font-bold text-xs px-5 py-3 rounded-xl flex items-center gap-1">
-                        <span>Students Only</span>
-                      </div>
-                    )
-                  ) : (
-                    <Link
-                      to="/student/login"
-                      className="bg-brand-orange hover:bg-brand-orange hover:shadow-lg hover:shadow-brand-orange/20 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all duration-200 flex items-center gap-1.5 group"
-                    >
-                      <span>Register Now</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                  )}
-                </div>
-
               </div>
-            );
-          })}
+            ))}
+          </div>
+        ) : (
+          /* ── Centered Olympiads Flex/Grid Layout ── */
+          <div className="flex flex-wrap justify-center gap-8">
+            {olympiads.map((item, index) => {
+              const track = getCategoryDetails(item.category);
+              return (
+                <div 
+                  key={item._id} 
+                  className="group relative w-full max-w-[360px] h-[440px] overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 shadow-lg transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2"
+                >
+                  {/* Custom Code-based Vector Illustration */}
+                  {renderIllustration(index)}
+
+                  {/* Gradient Overlay for Text Readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent z-10 pointer-events-none" />
+
+                  {/* Content Container */}
+                  <div className="relative z-20 flex h-full flex-col justify-between p-6 text-white">
+                    {/* Top Section: Logo Icon */}
+                    <div className="flex h-36 items-start">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white/30 bg-black/30 backdrop-blur-sm shadow-md">
+                        {track.icon}
+                      </div>
+                    </div>
+                    
+                    {/* Middle Section: Details (slides up on hover) */}
+                    <div className="space-y-4 transition-transform duration-500 ease-in-out group-hover:-translate-y-20 text-left">
+                      <div>
+                        <span className="inline-block px-2.5 py-0.5 bg-brand-orange text-white text-[9px] font-black rounded-lg uppercase tracking-widest mb-2 border border-white/20">
+                          {item.status || 'Active'}
+                        </span>
+                        <h3 className="text-2xl font-black text-white leading-snug">{item.title}</h3>
+                        <p className="text-xs text-white/80 font-bold tracking-wide mt-1">{track.grades}</p>
+                      </div>
+                      <div className="opacity-0 transition-opacity duration-300 group-hover:opacity-100 space-y-1.5">
+                        <h4 className="font-extrabold text-[9px] text-white/60 tracking-widest uppercase">Overview</h4>
+                        <p className="text-xs text-white/80 leading-relaxed font-semibold line-clamp-3">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom Section: Price and Button (revealed on hover) */}
+                    <div className="absolute -bottom-24 left-0 w-full p-6 opacity-0 transition-all duration-500 ease-in-out group-hover:bottom-0 group-hover:opacity-100 z-30">
+                      <div className="flex items-center justify-between border-t border-white/10 pt-4">
+                        <div className="text-left">
+                          <span className="text-[9px] text-white/50 block font-extrabold uppercase leading-none">REGISTRATION FEE</span>
+                          <span className="text-2xl font-black text-white font-heading mt-1.5 block">
+                            {item.currency === 'INR' || !item.currency ? '₹' : item.currency + ' '}
+                            {item.registrationFee}
+                          </span>
+                        </div>
+                        
+                        {isAuthenticated && isSchool ? (
+                          <Link
+                            to="/school/dashboard"
+                            className="bg-white hover:bg-white/95 text-brand-navy font-extrabold text-xs px-4 py-2.5 rounded-xl border border-slate-200 transition-all duration-200 flex items-center gap-1 shadow-sm active:translate-y-[1px]"
+                          >
+                            <span>Dashboard</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        ) : (
+                          <Link
+                            to="/register"
+                            className="bg-brand-orange hover:bg-brand-orange/95 text-white font-extrabold text-xs px-4 py-2.5 rounded-xl border border-brand-orange transition-all duration-200 flex items-center gap-1 shadow-sm active:translate-y-[1px]"
+                          >
+                            <span>Register School</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Bottom Center Proctor notice */}
+        <div className="bg-white border border-slate-250 max-w-xl mx-auto p-4 rounded-2xl flex items-center justify-center text-slate-600 text-xs text-center gap-2 mt-8 font-semibold shadow-sm">
+          <ShieldAlert className="w-4 h-4 text-brand-orange shrink-0" />
+          <span>Important: Coordination details and exam centers will be communicated directly to participating school coordinators.</span>
         </div>
-      )}
 
-      {/* Bottom Center Proctor notice to emphasize physical integrity */}
-      <div className="bg-slate-950/80 border border-slate-900/80 max-w-xl mx-auto p-4 rounded-2xl flex items-center justify-center text-slate-500 text-xs text-center gap-2 mt-8">
-        <ShieldAlert className="w-4 h-4 text-slate-500 shrink-0" />
-        <span>Important: Actual examination center coordinates and physical allocations will be updated on your Admit Card.</span>
       </div>
-
     </div>
   );
 }

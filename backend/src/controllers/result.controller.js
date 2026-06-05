@@ -1,5 +1,5 @@
 const Result = require('../models/Result');
-const OlympiadRegistration = require('../models/OlympiadRegistration');
+const Participant = require('../models/Participant');
 const Olympiad = require('../models/Olympiad');
 const { ApiError } = require('../utils/apiError');
 const { ApiResponse } = require('../utils/apiResponse');
@@ -22,8 +22,7 @@ const assertObjectId = (id) => {
    ═══════════════════════════════════════════════════════════════════════════════ */
 const createResult = asyncHandler(async (req, res) => {
   const {
-    registrationId,
-    studentId,
+    participantId,
     olympiadId,
     rollNumber,
     scores,
@@ -38,14 +37,13 @@ const createResult = asyncHandler(async (req, res) => {
   } = req.body;
 
   // Validate reference IDs
-  assertObjectId(registrationId);
-  assertObjectId(studentId);
+  assertObjectId(participantId);
   assertObjectId(olympiadId);
 
-  // Check duplicate result for registration
-  const duplicateReg = await Result.findOne({ registrationId });
+  // Check duplicate result for participant
+  const duplicateReg = await Result.findOne({ participantId });
   if (duplicateReg) {
-    throw new ApiError(409, 'A result is already created for this registration.');
+    throw new ApiError(409, 'A result is already created for this participant.');
   }
 
   // Check duplicate roll number
@@ -55,8 +53,7 @@ const createResult = asyncHandler(async (req, res) => {
   }
 
   const result = await Result.create({
-    registrationId,
-    studentId,
+    participantId,
     olympiadId,
     rollNumber,
     scores,
@@ -72,7 +69,7 @@ const createResult = asyncHandler(async (req, res) => {
   });
 
   const populated = await Result.findById(result._id)
-    .populate('studentId', 'name email')
+    .populate({ path: 'participantId', select: 'name class section rollNo', populate: { path: 'schoolId', select: 'name' } })
     .populate('olympiadId', 'title category');
 
   res.status(201).json(
@@ -140,7 +137,7 @@ const updateResult = asyncHandler(async (req, res) => {
 
   const updated = await result.save();
   const populated = await Result.findById(updated._id)
-    .populate('studentId', 'name email')
+    .populate({ path: 'participantId', select: 'name class section rollNo', populate: { path: 'schoolId', select: 'name' } })
     .populate('olympiadId', 'title category');
 
   res.status(200).json(
@@ -177,7 +174,7 @@ const deleteResult = asyncHandler(async (req, res) => {
 const listResults = asyncHandler(async (req, res) => {
   const {
     olympiadId,
-    studentId,
+    participantId,
     rollNumber,
     isPublished,
     page = 1,
@@ -187,7 +184,7 @@ const listResults = asyncHandler(async (req, res) => {
 
   const filter = {};
   if (olympiadId) filter.olympiadId = olympiadId;
-  if (studentId) filter.studentId = studentId;
+  if (participantId) filter.participantId = participantId;
   if (isPublished !== undefined) filter.isPublished = isPublished;
   if (rollNumber) filter.rollNumber = new RegExp(rollNumber.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
 
@@ -196,7 +193,7 @@ const listResults = asyncHandler(async (req, res) => {
 
   const [results, total] = await Promise.all([
     Result.find(filter)
-      .populate('studentId', 'name email phone')
+      .populate({ path: 'participantId', select: 'name class section rollNo', populate: { path: 'schoolId', select: 'name' } })
       .populate('olympiadId', 'title category registrationFee')
       .sort(sortObj)
       .skip(skip)
@@ -223,12 +220,12 @@ const listResults = asyncHandler(async (req, res) => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   GET OWN RESULTS (Student Portal)
+   GET OWN RESULTS (Student Portal - legacy fallback)
    GET /api/v1/results/me
    Access: Student only
    ═══════════════════════════════════════════════════════════════════════════════ */
 const getOwnResults = asyncHandler(async (req, res) => {
-  const results = await Result.find({ studentId: req.user._id, isPublished: true })
+  const results = await Result.find({ participantId: req.user._id, isPublished: true })
     .populate('olympiadId', 'title category timelines timelines.examDate')
     .sort('-createdAt')
     .lean();
@@ -247,7 +244,7 @@ const searchResult = asyncHandler(async (req, res) => {
   const { rollNumber } = req.query;
 
   const result = await Result.findOne({ rollNumber, isPublished: true })
-    .populate('studentId', 'name')
+    .populate({ path: 'participantId', select: 'name', populate: { path: 'schoolId', select: 'name' } })
     .populate('olympiadId', 'title category')
     .lean();
 
@@ -258,7 +255,8 @@ const searchResult = asyncHandler(async (req, res) => {
   // Sanitize data for public display to ensure privacy (e.g. no student phone/email)
   const sanitizedResult = {
     rollNumber: result.rollNumber,
-    studentName: result.studentId ? result.studentId.name : 'N/A',
+    studentName: result.participantId ? result.participantId.name : 'N/A',
+    schoolName: result.participantId?.schoolId ? result.participantId.schoolId.name : 'N/A',
     olympiad: result.olympiadId ? result.olympiadId.title : 'N/A',
     category: result.olympiadId ? result.olympiadId.category : 'N/A',
     scores: result.scores,

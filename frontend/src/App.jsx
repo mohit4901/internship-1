@@ -4,16 +4,16 @@ import { AuthProvider } from './context/AuthContext';
 import PublicLayout from './layouts/PublicLayout';
 import HomePage from './pages/Home';
 import AboutPage from './pages/About';
+import OlympiadPage from './pages/Olympiad';
 import OlympiadsPage from './pages/Olympiads';
-import ResultsPage from './pages/Results';
-import ContactPage from './pages/Contact';
+import ForSchoolsPage from './pages/ForSchools';
 import FAQsPage from './pages/FAQs';
-import NotFoundPage from './pages/NotFound';
-import StudentLoginPage from './pages/StudentLogin';
+import RegisterPage from './pages/Register';
+import ContactPage from './pages/Contact';
+import AnnouncementsPage from './pages/Announcements';
 import SchoolLoginPage from './pages/SchoolLogin';
-import StudentRegisterPage from './pages/StudentRegister';
-import SchoolRegisterPage from './pages/SchoolRegister';
-import DebugPanel from './components/DebugPanel';
+import SchoolDashboardPage from './pages/SchoolDashboard';
+import NotFoundPage from './pages/NotFound';
 
 export default function App() {
   return (
@@ -21,21 +21,26 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route element={<PublicLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/olympiads" element={<OlympiadsPage />} />
-            <Route path="/results" element={<ResultsPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/faqs" element={<FAQsPage />} />
-            <Route path="/student/login" element={<StudentLoginPage />} />
-            <Route path="/student/register" element={<StudentRegisterPage />} />
-            <Route path="/school/login" element={<SchoolLoginPage />} />
-            <Route path="/school/register" element={<SchoolRegisterPage />} />
+            {/* Public pages */}
+            <Route path="/"             element={<HomePage />} />
+            <Route path="/about"        element={<AboutPage />} />
+            <Route path="/olympiad"     element={<OlympiadPage />} />
+            <Route path="/olympiads"    element={<OlympiadsPage />} />
+            <Route path="/schools"      element={<ForSchoolsPage />} />
+            <Route path="/faqs"         element={<FAQsPage />} />
+            <Route path="/register"     element={<RegisterPage />} />
+            <Route path="/contact"      element={<ContactPage />} />
+            <Route path="/announcements" element={<AnnouncementsPage />} />
+
+            {/* School auth */}
+            <Route path="/school/login"      element={<SchoolLoginPage />} />
+            <Route path="/school/dashboard"  element={<SchoolDashboardPage />} />
+
+            {/* 404 */}
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
-      <DebugPanel />
     </AuthProvider>
   );
 }

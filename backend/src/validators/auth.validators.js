@@ -1,5 +1,30 @@
 const { z } = require('zod');
 
+// Helper phone schema that cleans up common formatting before validation
+const phoneSchema = (requiredMsg = 'Phone number is required', regexMsg = 'Please provide a valid 10-digit Indian mobile number') => z.preprocess(
+  (val) => {
+    if (typeof val !== 'string') return val;
+    let cleaned = val.replace(/[\s\-\(\)\+]/g, '');
+    if (cleaned.startsWith('91') && cleaned.length === 12) {
+      cleaned = cleaned.slice(2);
+    }
+    return cleaned;
+  },
+  z.string({ required_error: requiredMsg })
+    .regex(/^[6-9]\d{9}$/, regexMsg)
+);
+
+// Helper zip schema that cleans up spaces
+const zipSchema = (requiredMsg = 'ZIP code is required') => z.preprocess(
+  (val) => {
+    if (typeof val !== 'string') return val;
+    return val.replace(/\s+/g, '');
+  },
+  z.string({ required_error: requiredMsg })
+    .regex(/^\d{6}$/, 'Please provide a valid 6-digit PIN code')
+);
+
+
 /* ──────────────────────────────────────────
    Admin Auth Validators
    ────────────────────────────────────────── */
@@ -52,10 +77,7 @@ const studentRegisterSchema = z.object({
     .trim()
     .toLowerCase()
     .email('Please provide a valid email address'),
-  phone: z
-    .string({ required_error: 'Phone number is required' })
-    .trim()
-    .regex(/^[6-9]\d{9}$/, 'Please provide a valid 10-digit Indian mobile number'),
+  phone: phoneSchema('Phone number is required'),
   password: z
     .string({ required_error: 'Password is required' })
     .min(8, 'Password must be at least 8 characters')
@@ -76,14 +98,14 @@ const studentRegisterSchema = z.object({
   gender: z.enum(['Male', 'Female', 'Other']).optional(),
   parent: z.object({
     name:  z.string().trim().min(2, 'Parent name must be at least 2 characters'),
-    phone: z.string().trim().regex(/^[6-9]\d{9}$/, 'Please provide a valid parent phone number'),
+    phone: phoneSchema('Parent phone number is required', 'Please provide a valid parent phone number'),
     email: z.string().trim().toLowerCase().email('Please provide a valid parent email').optional(),
   }).optional(),
   address: z.object({
     street: z.string().trim().optional(),
     city:   z.string().trim().min(1, 'City is required'),
     state:  z.string().trim().min(1, 'State is required'),
-    zip:    z.string().trim().regex(/^\d{6}$/, 'Please provide a valid 6-digit PIN code'),
+    zip:    zipSchema('ZIP code is required'),
   }).optional(),
 });
 
@@ -117,7 +139,7 @@ const schoolRegisterSchema = z.object({
     street: z.string().trim().optional(),
     city:   z.string({ required_error: 'City is required' }).trim().min(1),
     state:  z.string({ required_error: 'State is required' }).trim().min(1),
-    zip:    z.string({ required_error: 'ZIP code is required' }).trim().regex(/^\d{6}$/, 'Please provide a valid 6-digit PIN code'),
+    zip:    zipSchema('ZIP code is required'),
     country: z.string().trim().optional().default('India'),
   }),
   contactEmail: z
@@ -125,14 +147,11 @@ const schoolRegisterSchema = z.object({
     .trim()
     .toLowerCase()
     .email('Please provide a valid school email'),
-  contactPhone: z
-    .string({ required_error: 'Contact phone is required' })
-    .trim()
-    .regex(/^[6-9]\d{9}$/, 'Please provide a valid 10-digit phone number'),
+  contactPhone: phoneSchema('Contact phone is required', 'Please provide a valid 10-digit phone number'),
   principalName: z.string().trim().optional(),
   coordinator: z.object({
     name:  z.string({ required_error: 'Coordinator name is required' }).trim().min(2),
-    phone: z.string({ required_error: 'Coordinator phone is required' }).trim().regex(/^[6-9]\d{9}$/, 'Please provide a valid coordinator phone'),
+    phone: phoneSchema('Coordinator phone is required', 'Please provide a valid coordinator phone'),
     email: z.string({ required_error: 'Coordinator email is required' }).trim().toLowerCase().email('Please provide a valid coordinator email'),
   }),
 });

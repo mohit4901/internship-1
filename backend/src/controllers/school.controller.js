@@ -18,6 +18,7 @@
 
 const mongoose         = require('mongoose');
 const School           = require('../models/School');
+const Participant      = require('../models/Participant');
 const { ApiError }     = require('../utils/apiError');
 const { ApiResponse }  = require('../utils/apiResponse');
 const { asyncHandler } = require('../utils/asyncHandler');
@@ -216,6 +217,160 @@ const listPublicSchools = asyncHandler(async (req, res) => {
   );
 });
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ADD PARTICIPANTS (batch)
+   POST /api/v1/schools/me/participants
+   Body: { participants: [{ name, class, section?, rollNo?, gender? }] }
+   Access: Authenticated school
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const addParticipants = asyncHandler(async (req, res) => {
+  const school = await School.findById(req.user._id);
+  if (!school) throw new ApiError(404, 'School not found.');
+  if (!school.isVerified) throw new ApiError(403, 'Your school must be verified before submitting participants.');
+
+  const { participants } = req.body;
+  if (!Array.isArray(participants) || participants.length === 0) {
+    throw new ApiError(400, 'Please provide a non-empty array of participants.');
+  }
+  if (participants.length > 200) {
+    throw new ApiError(400, 'You can submit at most 200 participants per batch.');
+  }
+
+  // Attach schoolId to every entry
+  const docs = participants.map((p) => ({ ...p, schoolId: school._id }));
+
+  const inserted = await Participant.insertMany(docs, { ordered: false });
+
+  // Update the count on the school document
+  school.registeredStudentsCount = await Participant.countDocuments({ schoolId: school._id });
+  await school.save({ validateBeforeSave: false });
+
+  res.status(201).json(
+    new ApiResponse(201, { added: inserted.length }, `${inserted.length} participant(s) added successfully.`)
+  );
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GET PARTICIPANTS
+   GET /api/v1/schools/me/participants?class=9&division=Junior&page=1&limit=50
+   Access: Authenticated school
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const getParticipants = asyncHandler(async (req, res) => {
+  const school = await School.findById(req.user._id);
+  if (!school) throw new ApiError(404, 'School not found.');
+
+  const { class: cls, division, page = 1, limit = 50 } = req.query;
+  const filter = { schoolId: school._id };
+  if (cls)      filter.class    = cls;
+  if (division) filter.division = division;
+
+  const skip = (Number(page) - 1) * Number(limit);
+  const [participants, total] = await Promise.all([
+    Participant.find(filter).sort('class name').skip(skip).limit(Number(limit)).lean(),
+    Participant.countDocuments(filter),
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        participants,
+        pagination: {
+          total,
+          page:       Number(page),
+          limit:      Number(limit),
+          totalPages: Math.ceil(total / Number(limit)),
+        },
+      },
+      'Participants fetched successfully.'
+    )
+  );
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GET SCHOOL PARTICIPANTS (ADMIN)
+   GET /api/v1/schools/:id/participants
+   Access: Admin only
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const getSchoolParticipantsAdmin = asyncHandler(async (req, res) => {
+  assertObjectId(req.params.id);
+  const school = await School.findById(req.params.id);
+  if (!school) throw new ApiError(404, 'School not found.');
+
+  const { class: cls, division, page = 1, limit = 50 } = req.query;
+  const filter = { schoolId: school._id };
+  if (cls)      filter.class    = cls;
+  if (division) filter.division = division;
+
+  const skip = (Number(page) - 1) * Number(limit);
+  const [participants, total] = await Promise.all([
+    Participant.find(filter).sort('class name').skip(skip).limit(Number(limit)).lean(),
+    Participant.countDocuments(filter),
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        participants,
+        pagination: {
+          total,
+          page:       Number(page),
+          limit:      Number(limit),
+          totalPages: Math.ceil(total / Number(limit)),
+        },
+      },
+      'School participants fetched successfully.'
+    )
+  );
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   GET ALL PARTICIPANTS (ADMIN GLOBAL LIST)
+   GET /api/v1/schools/admin/participants
+   Access: Admin only
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const listAllParticipantsAdmin = asyncHandler(async (req, res) => {
+  const { schoolId, class: cls, division, page = 1, limit = 50, search } = req.query;
+  const filter = {};
+  if (schoolId) {
+    assertObjectId(schoolId);
+    filter.schoolId = schoolId;
+  }
+  if (cls)      filter.class    = cls;
+  if (division) filter.division = division;
+  if (search) {
+    filter.name = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  }
+
+  const skip = (Number(page) - 1) * Number(limit);
+  const [participants, total] = await Promise.all([
+    Participant.find(filter)
+      .populate('schoolId', 'name')
+      .sort('class name')
+      .skip(skip)
+      .limit(Number(limit))
+      .lean(),
+    Participant.countDocuments(filter),
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        participants,
+        pagination: {
+          total,
+          page:       Number(page),
+          limit:      Number(limit),
+          totalPages: Math.ceil(total / Number(limit)),
+        },
+      },
+      'All participants fetched successfully.'
+    )
+  );
+});
+
 module.exports = {
   getOwnProfile,
   updateOwnProfile,
@@ -223,4 +378,8 @@ module.exports = {
   getSchoolById,
   verifySchool,
   listPublicSchools,
+  addParticipants,
+  getParticipants,
+  getSchoolParticipantsAdmin,
+  listAllParticipantsAdmin,
 };

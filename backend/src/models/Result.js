@@ -2,17 +2,11 @@ const mongoose = require('mongoose');
 
 const resultSchema = new mongoose.Schema(
   {
-    registrationId: {
+    participantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'OlympiadRegistration',
-      required: [true, 'Please associate this result to a registration entry'],
+      ref: 'Participant',
+      required: [true, 'Please associate this result to a participant profile'],
       unique: true,
-      index: true
-    },
-    studentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
-      required: [true, 'Please associate this result to a student profile'],
       index: true
     },
     olympiadId: {

@@ -1,8 +1,7 @@
 const { z } = require('zod');
 
 const createResultSchema = z.object({
-  registrationId: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'Invalid registration ID'),
-  studentId: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'Invalid student ID'),
+  participantId: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'Invalid participant ID'),
   olympiadId: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'Invalid Olympiad ID'),
   rollNumber: z.string().trim().min(3, 'Roll number must be at least 3 characters'),
   scores: z.object({
@@ -53,7 +52,7 @@ const searchResultQuerySchema = z.object({
 
 const listResultsQuerySchema = z.object({
   olympiadId: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'Invalid Olympiad ID').optional(),
-  studentId: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'Invalid student ID').optional(),
+  participantId: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'Invalid participant ID').optional(),
   rollNumber: z.string().trim().optional(),
   isPublished: z.string().transform((v) => v === 'true').optional(),
   page: z.coerce.number().int().min(1).optional().default(1),

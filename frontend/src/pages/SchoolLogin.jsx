@@ -1,72 +1,154 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { School, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowRight, Sparkles, Building2 } from 'lucide-react';
+
+/* ── Brand Logo (matching Navbar/Footer) ── */
+function BAIOLogo({ className = '' }) {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <circle cx="20" cy="20" r="17" stroke="#FF8C00" strokeWidth="2.5" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const x1 = 20 + 15 * Math.cos(rad);
+        const y1 = 20 + 15 * Math.sin(rad);
+        const x2 = 20 + 19 * Math.cos(rad);
+        const y2 = 20 + 19 * Math.sin(rad);
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="3" strokeLinecap="round" />;
+      })}
+      <circle cx="20" cy="20" r="10" fill="#001F5E" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const x2 = 20 + 8 * Math.cos(rad);
+        const y2 = 20 + 8 * Math.sin(rad);
+        return <line key={i} x1="20" y1="20" x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="1.2" strokeLinecap="round" />;
+      })}
+      <circle cx="20" cy="20" r="2.5" fill="#FF8C00" />
+    </svg>
+  );
+}
 
 export default function SchoolLoginPage() {
   const { loginSchool } = useAuth();
-  const navigate = useNavigate();
+  const navigate        = useNavigate();
   const [form, setForm] = useState({ contactEmail: '', affiliationNumber: '' });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState('');
 
-  const handle = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+  const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
   const submit = async (e) => {
     e.preventDefault();
-    setLoading(true); setError(null);
+    if (!form.contactEmail.trim() || !form.affiliationNumber.trim()) {
+      setError('Both fields are required.'); return;
+    }
+    setLoading(true); setError('');
     try {
       await loginSchool(form);
-      navigate('/');
+      navigate('/school/dashboard');
     } catch (err) {
-      setError(err?.message || 'Invalid credentials.');
-    } finally { setLoading(false); }
+      setError(err?.response?.data?.message || 'Invalid email or affiliation number. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="max-w-md mx-auto my-16 px-4">
-      <div className="glass-card p-8 rounded-2xl border border-white/5 space-y-6">
-        <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-green/10 border border-brand-green/20 mb-2">
-            <School className="w-6 h-6 text-brand-green" />
+    <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4 relative overflow-hidden py-12 selection:bg-brand-orange selection:text-white">
+      
+      {/* Floating Background Shapes */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-10 w-8 h-8 rounded-full bg-brand-orange/10 floating-slow-y" />
+        <div className="absolute top-1/3 right-12 w-12 h-12 rounded-full bg-brand-green/10 floating-slow-x" />
+        <div className="absolute top-10 right-1/4 text-brand-orange/20 floating-rotate">
+          <Sparkles className="w-10 h-10" />
+        </div>
+      </div>
+
+      <div className="w-full max-w-md space-y-8 relative z-10">
+
+        {/* Brand */}
+        <div className="text-center space-y-4">
+          <Link to="/" className="inline-flex items-center gap-3 no-underline group">
+            <BAIOLogo className="w-11 h-11" />
+            <div className="text-left">
+              <span className="font-heading font-extrabold text-2xl text-brand-navy block tracking-tight">BAIO</span>
+              <p className="text-[9px] text-brand-orange tracking-widest font-extrabold uppercase leading-none mt-0.5">Bharat AI Olympiad</p>
+            </div>
+          </Link>
+          <div>
+            <span className="brand-badge brand-badge-orange mb-2">
+              School Portal
+            </span>
+            <h1 className="font-heading font-extrabold text-3xl text-brand-navy leading-tight">School Login</h1>
+            <p className="text-slate-500 text-sm mt-1 max-w-xs mx-auto">
+              Enter your school's contact email and CBSE affiliation number.
+            </p>
           </div>
-          <h1 className="font-heading font-extrabold text-2xl text-white">School Login</h1>
-          <p className="text-slate-400 text-sm">Institutional coordinator access</p>
         </div>
 
-        {error && (
-          <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-red-300">{error}</p>
-          </div>
-        )}
+        {/* Main Card */}
+        <div className="bg-white border-4 border-brand-navy rounded-3xl p-8 edu-shadow-orange space-y-5">
+          <form onSubmit={submit} className="space-y-5">
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-brand-navy">
+                Contact Email <span className="text-brand-orange">*</span>
+              </label>
+              <input
+                type="email"
+                placeholder="school@yourinstitution.edu.in"
+                value={form.contactEmail}
+                onChange={(e) => set('contactEmail', e.target.value)}
+                className="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-950 focus:outline-none focus:border-brand-navy placeholder:text-slate-300 font-semibold"
+                required
+              />
+            </div>
 
-        <form onSubmit={submit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Coordinator Email</label>
-            <input name="contactEmail" type="email" required value={form.contactEmail} onChange={handle}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-brand-green transition-all"
-              placeholder="coordinator@school.edu.in" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Affiliation Number</label>
-            <input name="affiliationNumber" type="text" required value={form.affiliationNumber} onChange={handle}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-brand-green transition-all"
-              placeholder="e.g. CBSE12345" />
-          </div>
-          <button type="submit" disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-green to-emerald-600 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50">
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In as School'}
-          </button>
-        </form>
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-brand-navy">
+                Affiliation Number <span className="text-brand-orange">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 2730101"
+                value={form.affiliationNumber}
+                onChange={(e) => set('affiliationNumber', e.target.value)}
+                className="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-950 focus:outline-none focus:border-brand-navy placeholder:text-slate-300 font-semibold"
+                required
+              />
+              <p className="text-[10px] text-slate-400 font-medium">Your CBSE / board affiliation number used during registration.</p>
+            </div>
 
-        <p className="text-center text-xs text-slate-550">
-          New school coordinator?{' '}
-          <Link to="/school/register" className="text-brand-green hover:underline font-semibold">Register School here</Link>
-        </p>
-        <p className="text-center text-xs text-slate-550">
-          Student portal?{' '}
-          <Link to="/student/login" className="text-brand-orange hover:underline font-semibold">Student Login</Link>
+            {error && (
+              <div className="bg-red-50 border-2 border-red-200 text-red-700 text-xs font-bold px-4 py-3 rounded-2xl">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full justify-center py-3.5 shadow-md text-sm disabled:opacity-60 cursor-pointer"
+            >
+              {loading ? 'Signing in…' : 'Sign In to Dashboard'}
+              {!loading && <ArrowRight className="w-4 h-4" />}
+            </button>
+          </form>
+
+          <div className="text-center pt-3.5 border-t-2 border-slate-100">
+            <p className="text-xs text-slate-500 font-semibold">
+              Not registered yet?{' '}
+              <Link to="/register" className="text-brand-orange hover:text-[#e07c00] font-bold hover:underline">
+                Register your school
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-slate-400 font-medium">
+          Having trouble signing in? Email{' '}
+          <a href="mailto:schools@baio.in" className="text-brand-orange font-bold hover:underline">schools@baio.in</a>
         </p>
       </div>
     </div>

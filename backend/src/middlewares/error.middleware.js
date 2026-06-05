@@ -19,6 +19,9 @@ const errorHandler = (err, req, res, next) => {
   };
 
   logger.error(`[${req.method}] ${req.originalUrl} - ${error.statusCode} - ${error.message}`);
+  if (error.errors && error.errors.length > 0) {
+    logger.error(`Validation details: ${JSON.stringify(error.errors, null, 2)}`);
+  }
   if (process.env.NODE_ENV === 'development') {
     logger.error(error.stack);
   }

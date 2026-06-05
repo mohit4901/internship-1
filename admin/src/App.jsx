@@ -1,10 +1,12 @@
+import { useAdminAuth } from './context/AuthContext';
+import LoginPage from './pages/LoginPage';
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import AdminNavbar from './components/AdminNavbar';
 import {
   dashboardAPI, olympiadAPI, registrationAPI,
   studentAPI, schoolAPI, announcementAPI, resultAPI, contactAPI,
-  cmsAPI, mediaAPI
+  cmsAPI, mediaAPI, participantAPI
 } from './services';
 import {
   Users, School, Trophy, FileText, Megaphone, Award,
@@ -12,7 +14,7 @@ import {
   CheckCircle, Clock, ShieldAlert, XCircle, Eye,
   Calendar, Sparkles, ChevronLeft, ChevronRight, RefreshCw,
   Settings, Upload, Globe, HelpCircle, Phone, Home, Image,
-  FileCheck, Loader2, Check, AlertCircle, Trash2
+  FileCheck, Loader2, Check, AlertCircle, Trash2, ClipboardList
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────
@@ -50,7 +52,7 @@ function StatusBadge({ status }) {
   };
   const cls = map[status] || 'badge-slate';
   return (
-    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${cls}`}>
+    <span className={`inline-block px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider ${cls}`}>
       {status}
     </span>
   );
@@ -60,8 +62,8 @@ function SkeletonRows({ cols = 5, rows = 5 }) {
   return Array.from({ length: rows }).map((_, i) => (
     <tr key={i} className="animate-pulse">
       {Array.from({ length: cols }).map((__, j) => (
-        <td key={j} className="py-3.5 pr-4">
-          <div className="h-3.5 bg-slate-800/80 rounded-lg" style={{ width: `${55 + (j * 13) % 40}%` }} />
+        <td key={j} className="py-4">
+          <div className="h-4 bg-slate-100 border border-slate-200/50 rounded-lg" style={{ width: `${55 + (j * 13) % 40}%` }} />
         </td>
       ))}
     </tr>
@@ -71,23 +73,24 @@ function SkeletonRows({ cols = 5, rows = 5 }) {
 // ─────────────────────────────────────────────
 // Stat Card
 // ─────────────────────────────────────────────
-function StatCard({ label, value, sub, color = 'stat-blue', icon: Icon, loading }) {
+function StatCard({ label, value, sub, color = 'stat-indigo', icon: Icon, loading }) {
   return (
-    <div className={`admin-card ${color} p-5 space-y-4`}>
+    <div className="admin-card p-5 space-y-4 relative pt-6">
+      <div className={`absolute top-0 left-0 right-0 h-1.5 ${color}`} />
       <div className="flex items-start justify-between">
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">{label}</span>
+        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">{label}</span>
         {Icon && (
-          <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center">
-            <Icon className="w-3.5 h-3.5 text-slate-500" />
+          <div className="w-8 h-8 rounded-lg bg-brand-cream border-2 border-brand-navy flex items-center justify-center shrink-0">
+            <Icon className="w-4 h-4 text-brand-navy" />
           </div>
         )}
       </div>
       {loading ? (
-        <div className="h-8 w-24 bg-slate-800 rounded-lg animate-pulse" />
+        <div className="h-8 w-24 bg-slate-100 rounded-lg animate-pulse border border-slate-200" />
       ) : (
         <div className="flex items-end justify-between gap-2">
-          <span className="text-2xl font-extrabold text-white leading-none">{value ?? '—'}</span>
-          {sub && <span className="text-[10px] font-bold badge-green rounded px-1.5 py-0.5">{sub}</span>}
+          <span className="text-2xl font-black text-brand-navy leading-none">{value ?? '—'}</span>
+          {sub && <span className="text-[10px] font-black badge-green px-2 py-0.5">{sub}</span>}
         </div>
       )}
     </div>
@@ -99,12 +102,12 @@ function StatCard({ label, value, sub, color = 'stat-blue', icon: Icon, loading 
 // ─────────────────────────────────────────────
 function AdminTable({ headers, children, loading, cols, emptyMsg = 'No records found.' }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="admin-table w-full text-left text-xs border-collapse">
+    <div className="admin-table-container overflow-x-auto my-4">
+      <table className="admin-table">
         <thead>
-          <tr className="text-[10px] text-slate-500 uppercase tracking-widest">
+          <tr>
             {headers.map(h => (
-              <th key={h} className="pb-3 pr-5 font-bold whitespace-nowrap">{h}</th>
+              <th key={h}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -113,7 +116,7 @@ function AdminTable({ headers, children, loading, cols, emptyMsg = 'No records f
             <SkeletonRows cols={headers.length} />
           ) : React.Children.count(children) === 0 ? (
             <tr>
-              <td colSpan={headers.length} className="py-12 text-center text-slate-600 text-xs">
+              <td colSpan={headers.length} className="py-12 text-center text-slate-500 font-semibold">
                 {emptyMsg}
               </td>
             </tr>
@@ -131,13 +134,13 @@ function TableToolbar({ query, onQuery, onExport, placeholder = 'Search…', ext
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
       <div className="relative max-w-xs w-full">
-        <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="w-4 h-4 text-brand-navy/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="text"
           placeholder={placeholder}
           value={query}
           onChange={e => onQuery(e.target.value)}
-          className="w-full bg-slate-900/70 border border-white/5 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all"
+          className="w-full bg-white border-2 border-brand-navy rounded-xl pl-9 pr-4 py-2 text-xs text-brand-navy placeholder:text-slate-400 focus:outline-none focus:border-brand-orange transition-all font-semibold"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -145,9 +148,9 @@ function TableToolbar({ query, onQuery, onExport, placeholder = 'Search…', ext
         {onExport && (
           <button
             onClick={onExport}
-            className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/5 px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
+            className="btn-secondary text-xs flex items-center gap-1.5 py-2 px-4 shadow-sm"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-4 h-4" />
             <span>Export CSV</span>
           </button>
         )}
@@ -156,76 +159,37 @@ function TableToolbar({ query, onQuery, onExport, placeholder = 'Search…', ext
   );
 }
 
-// ─────────────────────────────────────────────
-// MOCK DATA (fallbacks when backend is offline)
-// ─────────────────────────────────────────────
-const MOCK_STATS = { totalRegistrations: 4892, totalRevenue: 1640290, activeOlympiads: 3, pendingApprovals: 24 };
+const MOCK_STATS = {
+  cards: { totalRegistrations: 0, totalRevenue: 0, activeOlympiads: 0, pendingApprovals: 0, totalParticipants: 0 },
+  breakdowns: {
+    schools: { verified: 0, pending: 0 },
+    registrations: { paid: 0, pending: 0 }
+  }
+};
 
-const MOCK_REGS = [
-  { _id:'r1', registrationNumber:'BAIO-REG-8392', studentId:{ name:'Aarav Sharma' }, schoolId:{ name:'DPS RK Puram' }, olympiadId:{ title:'Senior Division', category:'Senior' }, paymentStatus:'Paid', registrationStatus:'Confirmed', createdAt:'2026-05-29', rollNumber:'BAIO2026-SR-8392' },
-  { _id:'r2', registrationNumber:'BAIO-REG-4729', studentId:{ name:'Diya Patel' },   schoolId:{ name:'Aditya Birla' },  olympiadId:{ title:'Junior Division', category:'Junior' }, paymentStatus:'Paid', registrationStatus:'Confirmed', createdAt:'2026-05-28', rollNumber:'BAIO2026-JR-4729' },
-  { _id:'r3', registrationNumber:'BAIO-REG-1120', studentId:{ name:'Rohan Verma' },  schoolId:{ name:'IIT Kharagpur' }, olympiadId:{ title:'Masters Division', category:'Masters' }, paymentStatus:'Pending', registrationStatus:'Initiated', createdAt:'2026-05-28', rollNumber:'N/A' },
-  { _id:'r4', registrationNumber:'BAIO-REG-1092', studentId:{ name:'Ananya Rao' },   schoolId:{ name:'National Public' },olympiadId:{ title:'Senior Division', category:'Senior' }, paymentStatus:'Paid', registrationStatus:'Confirmed', createdAt:'2026-05-27', rollNumber:'BAIO2026-SR-1092' },
-  { _id:'r5', registrationNumber:'BAIO-REG-3341', studentId:{ name:'Kabir Mehta' },  schoolId:{ name:'Ryan International' },olympiadId:{ title:'Junior Division', category:'Junior' }, paymentStatus:'Failed', registrationStatus:'Cancelled', createdAt:'2026-05-26', rollNumber:'N/A' },
-];
-
-const MOCK_OLYMPIADS = [
-  { _id:'o1', title:'AI Olympiad - Junior Division', category:'Junior', status:'Active', registrationFee:299, currentRegistrationsCount:1820, timeline:{ examDate:'2026-07-15T00:00:00Z', registrationEnd:'2026-07-10T00:00:00Z' } },
-  { _id:'o2', title:'AI Olympiad - Senior Division', category:'Senior', status:'Active', registrationFee:399, currentRegistrationsCount:2108, timeline:{ examDate:'2026-07-18T00:00:00Z', registrationEnd:'2026-07-12T00:00:00Z' } },
-  { _id:'o3', title:'AI Olympiad - Masters Division', category:'Masters', status:'Active', registrationFee:499, currentRegistrationsCount:964,  timeline:{ examDate:'2026-07-20T00:00:00Z', registrationEnd:'2026-07-15T00:00:00Z' } },
-];
-
-const MOCK_STUDENTS = [
-  { _id:'s1', name:'Aarav Sharma', email:'aarav@dps.edu.in', phone:'9876543210', class:'10', isActive:true, isEmailVerified:true, createdAt:'2026-05-20' },
-  { _id:'s2', name:'Diya Patel',   email:'diya@ab.edu.in',   phone:'9876543211', class:'8',  isActive:true, isEmailVerified:true, createdAt:'2026-05-21' },
-  { _id:'s3', name:'Rohan Verma',  email:'rohan@iit.ac.in',  phone:'9876543212', class:'UG', isActive:false,isEmailVerified:false,createdAt:'2026-05-22' },
-];
-
-const MOCK_SCHOOLS = [
-  { _id:'sc1', name:'DPS RK Puram', board:'CBSE', address:{ city:'New Delhi', state:'Delhi' }, contactEmail:'coord@dps.edu.in', isVerified:true, registeredStudentsCount:38 },
-  { _id:'sc2', name:'Aditya Birla World Academy', board:'ICSE', address:{ city:'Mumbai', state:'Maharashtra' }, contactEmail:'coord@abwa.edu.in', isVerified:true, registeredStudentsCount:24 },
-  { _id:'sc3', name:'Ryan International Noida', board:'CBSE', address:{ city:'Noida', state:'Uttar Pradesh' }, contactEmail:'coord@ryan.edu.in', isVerified:false, registeredStudentsCount:11 },
-];
-
-const MOCK_ANNOUNCEMENTS = [
-  { _id:'a1', title:'Official Syllabus Released', category:'OlympiadInfo', isPinned:true, publishedAt:'2026-05-25', targetAudience:'All' },
-  { _id:'a2', title:'Physical Centre Guidelines', category:'Schedule', isPinned:false, publishedAt:'2026-05-22', targetAudience:'All' },
-];
-
-const MOCK_RESULTS = [
-  { _id:'res1', rollNumber:'BAIO-2026-SR-911', studentId:{name:'Aditya Sharma'}, olympiadId:{title:'Senior Division'}, scores:{totalMarksObtained:92}, percentage:92, percentile:99.82, rankings:{national:14}, qualificationStatus:'MeritAwardee', isPublished:true },
-  { _id:'res2', rollNumber:'BAIO-2026-JR-402', studentId:{name:'Kunal Sen'},     olympiadId:{title:'Junior Division'}, scores:{totalMarksObtained:84}, percentage:84, percentile:98.15, rankings:{national:88}, qualificationStatus:'Qualified',     isPublished:true },
-  { _id:'res3', rollNumber:'BAIO-2026-MS-888', studentId:{name:'Drisha Roy'},    olympiadId:{title:'Masters Division'},scores:{totalMarksObtained:96}, percentage:96, percentile:99.98, rankings:{national:3},  qualificationStatus:'NationalRanker',  isPublished:false },
-];
-
-const MOCK_CONTACTS = [
-  { _id:'c1', name:'Priya Nair', email:'priya@school.in', subject:'Admit Card Query', status:'New', createdAt:'2026-05-28' },
-  { _id:'c2', name:'Sumit Das',  email:'sumit@example.com',subject:'Payment Failure',  status:'InProgress', createdAt:'2026-05-27' },
-  { _id:'c3', name:'Meera Joshi',email:'meera@school.edu', subject:'Hall Ticket',      status:'Resolved', createdAt:'2026-05-26' },
-];
+const MOCK_REGS = [];
+const MOCK_OLYMPIADS = [];
+const MOCK_STUDENTS = [];
+const MOCK_SCHOOLS = [];
+const MOCK_ANNOUNCEMENTS = [];
+const MOCK_RESULTS = [];
+const MOCK_CONTACTS = [];
 
 // ─────────────────────────────────────────────
 // Page: Dashboard
 // ─────────────────────────────────────────────
 function DashboardPage() {
   const [stats, setStats]     = useState(null);
-  const [regs, setRegs]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery]     = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [sRes, rRes] = await Promise.all([
-        dashboardAPI.stats(),
-        registrationAPI.list({ limit: 10, sort: '-createdAt' }),
-      ]);
-      setStats(sRes?.data?.data || sRes?.data || MOCK_STATS);
-      const list = rRes?.data?.data || rRes?.data || [];
-      setRegs(Array.isArray(list) && list.length ? list : MOCK_REGS);
+      const res = await dashboardAPI.stats();
+      setStats(res?.data?.data || res?.data || MOCK_STATS);
     } catch {
       setStats(MOCK_STATS);
-      setRegs(MOCK_REGS);
     } finally {
       setLoading(false);
     }
@@ -233,12 +197,26 @@ function DashboardPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const filtered = regs.filter(r => {
+  const handleVerifySchool = async (schoolId, name, currentStatus) => {
+    const targetStatus = !currentStatus;
+    const msg = targetStatus ? `Verify and approve school "${name}"?` : `Revoke verification for school "${name}"?`;
+    if (!window.confirm(msg)) return;
+    try {
+      await schoolAPI.verify(schoolId, { isVerified: targetStatus, remarks: 'Verified from admin dashboard quick action' });
+      load();
+    } catch (err) {
+      alert(err?.response?.data?.message || err?.message || 'Failed to update verification status.');
+    }
+  };
+
+  const recentSchools = stats?.recentActivity?.schools || [];
+  const filteredSchools = recentSchools.filter(s => {
     const q = query.toLowerCase();
     return (
-      (r.studentId?.name || '').toLowerCase().includes(q) ||
-      (r.schoolId?.name  || '').toLowerCase().includes(q) ||
-      (r.registrationNumber || '').toLowerCase().includes(q)
+      (s.name || '').toLowerCase().includes(q) ||
+      (s.board || '').toLowerCase().includes(q) ||
+      (s.address?.city || '').toLowerCase().includes(q) ||
+      (s.address?.state || '').toLowerCase().includes(q)
     );
   });
 
@@ -246,37 +224,75 @@ function DashboardPage() {
     <div className="space-y-7">
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard label="Total Registrations" value={fmt(stats?.totalRegistrations)} sub="+12.4%" color="stat-blue"  icon={FileText} loading={loading} />
-        <StatCard label="Revenue Collected"   value={stats ? `₹${fmt(stats.totalRevenue)}` : null} sub="+8.2%" color="stat-green" icon={TrendingUp} loading={loading} />
-        <StatCard label="Active Olympiads"    value={fmt(stats?.activeOlympiads)}    sub="Stable" color="stat-indigo" icon={Trophy}   loading={loading} />
-        <StatCard label="Pending Approvals"   value={fmt(stats?.pendingApprovals)}   color="stat-amber"  icon={Clock}   loading={loading} />
+        <StatCard 
+          label="Total Schools" 
+          value={fmt(stats?.cards?.totalSchools)} 
+          sub={stats?.breakdowns?.schools ? `Pending: ${fmt(stats.breakdowns.schools.pending)}` : "Enrolled"} 
+          color="stat-indigo" 
+          icon={School}   
+          loading={loading} 
+        />
+        <StatCard 
+          label="School Participants" 
+          value={fmt(stats?.cards?.totalParticipants)} 
+          sub="Batch Uploaded" 
+          color="stat-green" 
+          icon={ClipboardList} 
+          loading={loading} 
+        />
+        <StatCard 
+          label="Active Olympiads" 
+          value={fmt(stats?.cards?.totalOlympiads)} 
+          sub="Active catalogs" 
+          color="stat-blue"  
+          icon={Trophy} 
+          loading={loading} 
+        />
+        <StatCard 
+          label="Scorecards Created" 
+          value={fmt(stats?.cards?.totalResults)} 
+          sub="Published / Saved" 
+          color="stat-amber"  
+          icon={Award}   
+          loading={loading} 
+        />
       </div>
 
-      {/* Recent Registrations */}
+      {/* Recent School Registrations */}
       <div className="admin-card p-6">
-        <h2 className="text-sm font-bold text-slate-200 mb-4 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-blue-400" />
-          Recent Registrations
+        <h2 className="text-sm font-bold text-[#001F5E] mb-4 flex items-center gap-2">
+          <School className="w-4 h-4 text-brand-orange" />
+          Recent School Registrations
         </h2>
-        <TableToolbar query={query} onQuery={setQuery} placeholder="Search name, school, reg no…" onExport={() => {}} />
+        <TableToolbar query={query} onQuery={setQuery} placeholder="Search name, board, location…" onExport={null} />
         <AdminTable
           loading={loading}
-          headers={['Reg No.', 'Student', 'School', 'Division', 'Date', 'Payment', 'Status', 'Roll No.']}
+          headers={['School Name', 'Board', 'City', 'State', 'Participants', 'Verification', 'Action']}
         >
-          {filtered.map(r => (
-            <tr key={r._id}>
-              <td className="py-3.5 pr-4 font-mono text-[10px] text-slate-500">{r.registrationNumber}</td>
-              <td className="py-3.5 pr-4 font-semibold text-slate-100">{r.studentId?.name || '—'}</td>
-              <td className="py-3.5 pr-4 text-slate-400">{r.schoolId?.name || '—'}</td>
+          {filteredSchools.map(s => (
+            <tr key={s._id}>
+              <td className="py-3.5 pr-4 font-semibold text-slate-800">{s.name}</td>
+              <td className="py-3.5 pr-4 text-slate-500">{s.board || '—'}</td>
+              <td className="py-3.5 pr-4 text-slate-500">{s.address?.city || '—'}</td>
+              <td className="py-3.5 pr-4 text-slate-500">{s.address?.state || '—'}</td>
+              <td className="py-3.5 pr-4 text-slate-700 font-semibold">{s.registeredStudentsCount || 0}</td>
               <td className="py-3.5 pr-4">
-                <span className="badge-blue inline-block px-2 py-0.5 rounded-full text-[10px] font-bold">
-                  {r.olympiadId?.category || r.olympiadId?.title || '—'}
-                </span>
+                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  s.isVerified ? 'badge-green' : 'badge-amber'
+                }`}>{s.isVerified ? 'Verified' : 'Pending'}</span>
               </td>
-              <td className="py-3.5 pr-4 text-slate-500 whitespace-nowrap">{fmtDate(r.createdAt)}</td>
-              <td className="py-3.5 pr-4"><StatusBadge status={r.paymentStatus} /></td>
-              <td className="py-3.5 pr-4"><StatusBadge status={r.registrationStatus} /></td>
-              <td className="py-3.5 font-mono text-[10px] text-slate-500">{r.rollNumber || '—'}</td>
+              <td className="py-3.5 pr-4">
+                <button
+                  onClick={() => handleVerifySchool(s._id, s.name, s.isVerified)}
+                  className={`px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-all border-2 border-brand-navy shadow-[0_2px_0px_0px_#001F5E] hover:-translate-y-0.5 active:translate-y-0.5 ${
+                    s.isVerified 
+                      ? 'bg-rose-500 text-white hover:bg-rose-600' 
+                      : 'bg-brand-green text-white hover:bg-emerald-700'
+                  }`}
+                >
+                  {s.isVerified ? 'Revoke' : 'Approve'}
+                </button>
+              </td>
             </tr>
           ))}
         </AdminTable>
@@ -324,56 +340,66 @@ function OlympiadsPage() {
     } finally { setSaving(false); }
   };
 
+  const handleDelete = async (id, title) => {
+    if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
+    try {
+      await olympiadAPI.delete(id);
+      load();
+    } catch (err) {
+      alert(err?.response?.data?.message || err?.message || 'Failed to delete olympiad.');
+    }
+  };
+
   const filtered = data.filter(o =>
     (o.title || '').toLowerCase().includes(query.toLowerCase())
   );
 
-  const inputCls = 'w-full bg-slate-900/60 border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all';
+  const inputCls = 'w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#FF8C00] transition-all font-semibold';
 
   return (
     <div className="space-y-5">
       <div className="admin-card p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-blue-400" /> Olympiad Catalog
+          <h2 className="text-sm font-bold text-[#001F5E] flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-brand-orange" /> Olympiad Catalog
           </h2>
-          <button onClick={() => setShowForm(s => !s)} className="flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer">
-            <Plus className="w-3.5 h-3.5" /> {showForm ? 'Cancel' : 'New Olympiad'}
+          <button onClick={() => setShowForm(s => !s)} className="btn-secondary text-xs py-1.5 px-3">
+            <Plus className="w-3.5 h-3.5 text-brand-orange" /> {showForm ? 'Cancel' : 'New Olympiad'}
           </button>
         </div>
 
         {showForm && (
-          <form onSubmit={handleCreate} className="mb-6 bg-slate-900/50 border border-blue-500/20 rounded-2xl p-5 space-y-4">
-            <h3 className="text-sm font-bold text-blue-400">Create New Olympiad</h3>
+          <form onSubmit={handleCreate} className="mb-6 space-y-4">
+            <h3 className="text-sm font-bold text-[#001F5E]">Create New Olympiad</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Title *</label>
+                <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Title *</label>
                 <input required className={inputCls} placeholder="AI Olympiad - Junior Division" value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} />
               </div>
               <div className="col-span-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Description</label>
+                <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Description</label>
                 <textarea className={inputCls} rows={2} placeholder="Brief description…" value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Category *</label>
+                <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Category *</label>
                 <select required className={inputCls} value={form.category} onChange={e => setForm(p => ({...p, category: e.target.value}))}>
                   <option>Junior</option><option>Senior</option><option>Masters</option><option>General</option><option>AI</option>
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Registration Fee (₹)</label>
+                <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Registration Fee (₹)</label>
                 <input type="number" min="0" className={inputCls} value={form.registrationFee} onChange={e => setForm(p => ({...p, registrationFee: Number(e.target.value)}))} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Exam Date *</label>
+                <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Exam Date *</label>
                 <input required type="date" className={inputCls} value={form.examDate} onChange={e => setForm(p => ({...p, examDate: e.target.value}))} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Registration Closes *</label>
+                <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Registration Closes *</label>
                 <input required type="date" className={inputCls} value={form.registrationLastDate} onChange={e => setForm(p => ({...p, registrationLastDate: e.target.value}))} />
               </div>
             </div>
-            <button type="submit" disabled={saving} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
+            <button type="submit" disabled={saving} className="btn-primary">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               {saving ? 'Creating…' : 'Create Olympiad'}
             </button>
@@ -381,19 +407,29 @@ function OlympiadsPage() {
         )}
 
         <TableToolbar query={query} onQuery={setQuery} placeholder="Search olympiad…" />
-        <AdminTable loading={loading} headers={['Title', 'Category', 'Fee', 'Exam Date', 'Reg. Closes', 'Status']}>
+        <AdminTable loading={loading} headers={['Title', 'Category', 'Fee', 'Exam Date', 'Reg. Closes', 'Status', 'Actions']}>
           {filtered.map(o => (
             <tr key={o._id}>
-              <td className="py-3.5 pr-4 font-semibold text-slate-100 max-w-[220px] truncate">{o.title}</td>
+              <td className="py-3.5 pr-4 font-semibold text-slate-800 max-w-[220px] truncate">{o.title}</td>
               <td className="py-3.5 pr-4">
                 <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
                   o.category === 'Junior' ? 'badge-green' : o.category === 'Senior' ? 'badge-amber' : 'badge-indigo'
                 }`}>{o.category}</span>
               </td>
-              <td className="py-3.5 pr-4 text-slate-300">{o.registrationFee === 0 || o.isFree ? 'Free' : `₹${fmt(o.registrationFee)}`}</td>
-              <td className="py-3.5 pr-4 text-slate-500 whitespace-nowrap">{fmtDate(o.timeline?.examDate || o.examDate)}</td>
-              <td className="py-3.5 pr-4 text-slate-500 whitespace-nowrap">{fmtDate(o.timeline?.registrationEnd || o.registrationLastDate)}</td>
+              <td className="py-3.5 pr-4 text-slate-700 font-semibold">{o.registrationFee === 0 || o.isFree ? 'Free' : `₹${fmt(o.registrationFee)}`}</td>
+              <td className="py-3.5 pr-4 text-slate-555 whitespace-nowrap">{fmtDate(o.timeline?.examDate || o.examDate)}</td>
+              <td className="py-3.5 pr-4 text-slate-555 whitespace-nowrap">{fmtDate(o.timeline?.registrationEnd || o.registrationLastDate)}</td>
               <td className="py-3.5 pr-4"><StatusBadge status={o.status || o.status} /></td>
+              <td className="py-3.5 pr-4">
+                <button
+                  disabled={o.status === 'Active' || o.status === 'RegistrationClosed'}
+                  onClick={() => handleDelete(o._id, o.title)}
+                  className="bg-rose-500 hover:bg-rose-600 text-white border-2 border-brand-navy shadow-[0_2px_0px_0px_#001F5E] hover:-translate-y-0.5 active:translate-y-0.5 px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  title={o.status === 'Active' || o.status === 'RegistrationClosed' ? 'Cannot delete active/closed Olympiad' : 'Delete'}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
         </AdminTable>
@@ -524,16 +560,66 @@ function SchoolsPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery]     = useState('');
 
+  // Verification modal state
+  const [verifySchoolItem, setVerifySchoolItem] = useState(null);
+  const [verifyStatus, setVerifyStatus] = useState(true);
+  const [remarks, setRemarks] = useState('');
+  const [savingVerify, setSavingVerify] = useState(false);
+
+  // Participants modal state
+  const [selectedSchoolForParticipants, setSelectedSchoolForParticipants] = useState(null);
+  const [schoolParticipants, setSchoolParticipants] = useState([]);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
+  const [participantsQuery, setParticipantsQuery] = useState('');
+  const [participantsClassFilter, setParticipantsClassFilter] = useState('');
+
+  const loadSchools = async () => {
+    setLoading(true);
+    try {
+      const res = await schoolAPI.list({ limit: 100 });
+      const list = res?.data?.data || res?.data || [];
+      setData(Array.isArray(list) && list.length ? list : MOCK_SCHOOLS);
+    } catch { setData(MOCK_SCHOOLS); }
+    finally { setLoading(false); }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await schoolAPI.list({ limit: 50 });
-        const list = res?.data?.data || res?.data || [];
-        setData(Array.isArray(list) && list.length ? list : MOCK_SCHOOLS);
-      } catch { setData(MOCK_SCHOOLS); }
-      finally { setLoading(false); }
-    })();
+    loadSchools();
   }, []);
+
+  useEffect(() => {
+    if (!selectedSchoolForParticipants) return;
+    (async () => {
+      setLoadingParticipants(true);
+      try {
+        const res = await participantAPI.listForSchool(selectedSchoolForParticipants._id, { limit: 200 });
+        const list = res?.data?.data?.participants || res?.data?.data || [];
+        setSchoolParticipants(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error(err);
+        setSchoolParticipants([]);
+      } finally {
+        setLoadingParticipants(false);
+      }
+    })();
+  }, [selectedSchoolForParticipants]);
+
+  const handleVerifySubmit = async (e) => {
+    e.preventDefault();
+    if (!verifySchoolItem) return;
+    setSavingVerify(true);
+    try {
+      await schoolAPI.verify(verifySchoolItem._id, { isVerified: verifyStatus, remarks });
+      // Update local state
+      setData(prev => prev.map(s => s._id === verifySchoolItem._id ? { ...s, isVerified: verifyStatus } : s));
+      setVerifySchoolItem(null);
+      setRemarks('');
+    } catch (err) {
+      alert(err?.message || 'Verification update failed.');
+    } finally {
+      setSavingVerify(false);
+    }
+  };
 
   const filtered = data.filter(s => {
     const q = query.toLowerCase();
@@ -545,7 +631,7 @@ function SchoolsPage() {
   return (
     <div className="admin-card p-6">
       <TableToolbar query={query} onQuery={setQuery} placeholder="Search school, city…" onExport={() => {}} />
-      <AdminTable loading={loading} headers={['School Name', 'Board', 'City', 'State', 'Students', 'Verified', 'Email']}>
+      <AdminTable loading={loading} headers={['School Name', 'Board', 'City', 'State', 'Students', 'Verified', 'Email', 'Actions']}>
         {filtered.map(s => (
           <tr key={s._id}>
             <td className="py-3.5 pr-4 font-semibold text-slate-100 max-w-[200px] truncate">{s.name}</td>
@@ -554,19 +640,302 @@ function SchoolsPage() {
             </td>
             <td className="py-3.5 pr-4 text-slate-400">{s.address?.city || '—'}</td>
             <td className="py-3.5 pr-4 text-slate-400">{s.address?.state || '—'}</td>
-            <td className="py-3.5 pr-4 text-slate-300 font-semibold">{fmt(s.registeredStudentsCount)}</td>
+            <td className="py-3.5 pr-4">
+              <button
+                onClick={() => setSelectedSchoolForParticipants(s)}
+                className="text-blue-500 hover:text-blue-600 hover:underline font-extrabold cursor-pointer"
+              >
+                {fmt(s.registeredStudentsCount)} Students
+              </button>
+            </td>
             <td className="py-3.5 pr-4"><StatusBadge status={s.isVerified ? 'Confirmed' : 'Pending'} /></td>
             <td className="py-3.5 text-slate-500 text-[10px]">{s.contactEmail}</td>
+            <td className="py-3.5">
+              <button
+                onClick={() => {
+                  setVerifySchoolItem(s);
+                  setVerifyStatus(!s.isVerified);
+                  setRemarks('');
+                }}
+                className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                  s.isVerified
+                    ? 'text-rose-450 hover:text-rose-350 bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20'
+                    : 'text-brand-orange hover:text-brand-orange/90 bg-brand-orange/10 hover:bg-brand-orange/20 border-brand-orange/20'
+                }`}
+              >
+                {s.isVerified ? 'Reject/Revoke' : 'Approve/Verify'}
+              </button>
+            </td>
           </tr>
         ))}
       </AdminTable>
+
+      {/* Verification Modal */}
+      {verifySchoolItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white border-4 border-brand-navy rounded-3xl p-6 max-w-md w-full shadow-2xl relative">
+            <button
+              onClick={() => setVerifySchoolItem(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
+            >
+              ✕
+            </button>
+            <h3 className="text-base font-black text-brand-navy mb-2">School Verification</h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Update verification status for <strong className="text-slate-800">{verifySchoolItem.name}</strong>.
+            </p>
+            <form onSubmit={handleVerifySubmit} className="space-y-4 !border-0 !p-0 !shadow-none">
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</label>
+                <select
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800"
+                  value={verifyStatus ? 'true' : 'false'}
+                  onChange={e => setVerifyStatus(e.target.value === 'true')}
+                >
+                  <option value="true">Verify & Approve</option>
+                  <option value="false">Reject / Pending</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Remarks (Optional)</label>
+                <textarea
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800"
+                  rows={3}
+                  placeholder="Reason for verification change or remarks..."
+                  value={remarks}
+                  onChange={e => setRemarks(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setVerifySchoolItem(null)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingVerify}
+                  className="px-4 py-2 bg-brand-orange hover:bg-brand-orange/90 text-white rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {savingVerify ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Participants Detail Modal */}
+      {selectedSchoolForParticipants && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white border-4 border-brand-navy rounded-3xl p-6 max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl relative">
+            <button
+              onClick={() => setSelectedSchoolForParticipants(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
+            >
+              ✕
+            </button>
+            <h3 className="text-base font-black text-brand-navy mb-1">School Participants</h3>
+            <p className="text-xs text-slate-500 mb-4">
+              Registered participants for <strong className="text-slate-800">{selectedSchoolForParticipants.name}</strong>
+            </p>
+
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+              <div className="relative max-w-xs w-full">
+                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search student name..."
+                  value={participantsQuery}
+                  onChange={e => setParticipantsQuery(e.target.value)}
+                  className="w-full bg-white border border-slate-250 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange"
+                />
+              </div>
+              <select
+                className="bg-white border border-slate-250 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand-orange max-w-[150px] w-full"
+                value={participantsClassFilter}
+                onChange={e => setParticipantsClassFilter(e.target.value)}
+              >
+                <option value="">All Classes</option>
+                {['6', '7', '8', '9', '10', '11', '12'].map(c => (
+                  <option key={c} value={c}>Class {c}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Table */}
+            <div className="flex-1 overflow-y-auto min-h-0 border-t border-slate-100 pt-3">
+              <AdminTable
+                loading={loadingParticipants}
+                headers={['Name', 'Class', 'Section', 'Roll No.', 'Gender', 'Division']}
+                emptyMsg="No participants submitted by this school."
+              >
+                {schoolParticipants
+                  .filter(p => {
+                    const q = participantsQuery.toLowerCase();
+                    const matchesSearch = (p.name || '').toLowerCase().includes(q);
+                    const matchesClass = !participantsClassFilter || p.class === participantsClassFilter;
+                    return matchesSearch && matchesClass;
+                  })
+                  .map(p => (
+                    <tr key={p._id}>
+                      <td className="py-2.5 pr-4 font-semibold text-slate-800">{p.name}</td>
+                      <td className="py-2.5 pr-4 text-slate-600">Class {p.class}</td>
+                      <td className="py-2.5 pr-4 text-slate-505">{p.section || '—'}</td>
+                      <td className="py-2.5 pr-4 font-mono text-[10px] text-slate-650">{p.rollNo || '—'}</td>
+                      <td className="py-2.5 pr-4 text-slate-550">{p.gender || '—'}</td>
+                      <td className="py-2.5 pr-4">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          p.division === 'Junior' ? 'badge-green' : 'badge-indigo'
+                        }`}>{p.division || '—'}</span>
+                      </td>
+                    </tr>
+                  ))}
+              </AdminTable>
+            </div>
+            <div className="flex justify-end pt-4 mt-3 border-t border-slate-100">
+              <button
+                onClick={() => setSelectedSchoolForParticipants(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ─────────────────────────────────────────────
-// Page: Announcements
+// Page: Participants (Global list)
 // ─────────────────────────────────────────────
+function ParticipantsPage() {
+  const [data, setData]       = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery]     = useState('');
+  const [classFilter, setClassFilter] = useState('');
+  const [divisionFilter, setDivisionFilter] = useState('');
+  const [page, setPage]       = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await participantAPI.list({
+        page,
+        limit: 50,
+        class: classFilter || undefined,
+        division: divisionFilter || undefined,
+        search: query || undefined
+      });
+      const list = res?.data?.data?.participants || res?.data?.participants || [];
+      setData(list);
+      setTotalPages(res?.data?.data?.pagination?.totalPages || 1);
+    } catch {
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, classFilter, divisionFilter, query]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <div className="admin-card p-6 animate-fade-up">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+        <div className="relative max-w-xs w-full">
+          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search student name…"
+            value={query}
+            onChange={e => { setQuery(e.target.value); setPage(1); }}
+            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand-orange font-semibold"
+          />
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand-orange font-semibold"
+            value={classFilter}
+            onChange={e => { setClassFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">All Classes</option>
+            {['6', '7', '8', '9', '10', '11', '12'].map(c => (
+              <option key={c} value={c}>Class {c}</option>
+            ))}
+          </select>
+          <select
+            className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-brand-orange font-semibold"
+            value={divisionFilter}
+            onChange={e => { setDivisionFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">All Divisions</option>
+            <option value="Junior">Junior</option>
+            <option value="Senior">Senior</option>
+          </select>
+          <button
+            onClick={load}
+            className="p-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 rounded-xl text-slate-600 transition-all cursor-pointer"
+            title="Refresh"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      <AdminTable loading={loading} headers={['Name', 'Class', 'Section', 'Roll No.', 'Gender', 'Division', 'School']}>
+        {data.map(p => (
+          <tr key={p._id}>
+            <td className="py-3.5 pr-4 font-semibold text-slate-800">{p.name}</td>
+            <td className="py-3.5 pr-4 text-slate-600">Class {p.class}</td>
+            <td className="py-3.5 pr-4 text-slate-500">{p.section || '—'}</td>
+            <td className="py-3.5 pr-4 font-mono text-[10px] text-slate-600">{p.rollNo || '—'}</td>
+            <td className="py-3.5 pr-4 text-slate-500">{p.gender || '—'}</td>
+            <td className="py-3.5 pr-4">
+              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                p.division === 'Junior' ? 'badge-green' : 'badge-indigo'
+              }`}>{p.division}</span>
+            </td>
+            <td className="py-3.5 text-slate-800 font-medium truncate max-w-[180px]" title={p.schoolId?.name}>{p.schoolId?.name || '—'}</td>
+          </tr>
+        ))}
+      </AdminTable>
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-5 mt-5 border-t border-slate-100">
+          <span className="text-xs text-slate-500">
+            Page {page} of {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              className="p-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 disabled:opacity-40 rounded-xl transition-all cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4 text-slate-650" />
+            </button>
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              className="p-2 bg-slate-100 hover:bg-slate-200 border border-slate-355 disabled:opacity-40 rounded-xl transition-all cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4 text-slate-650" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AnnouncementsPage() {
   const [data, setData]       = useState([]);
   const [loading, setLoading] = useState(true);
@@ -635,8 +1004,8 @@ function AnnouncementsPage() {
     (a.content || '').toLowerCase().includes(query.toLowerCase())
   );
 
-  const inputCls = 'w-full bg-slate-900/60 border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all';
-  const textareaCls = 'w-full bg-slate-900/60 border border-white/8 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder:text-slate-650 focus:outline-none focus:border-blue-500/50 transition-all resize-none';
+  const inputCls = 'w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#FF8C00] transition-all font-semibold';
+  const textareaCls = 'w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#FF8C00] transition-all resize-none font-semibold';
 
   return (
     <div className="space-y-5">
@@ -644,26 +1013,26 @@ function AnnouncementsPage() {
         <TableToolbar query={query} onQuery={setQuery} placeholder="Search announcement…" />
         <button 
           onClick={() => setShowForm(s => !s)}
-          className="flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ml-3 cursor-pointer shrink-0"
+          className="btn-secondary text-xs py-1.5 px-3 shrink-0 ml-3"
         >
-          <Plus className="w-3.5 h-3.5" /> {showForm ? 'Cancel' : 'New Bulletin'}
+          <Plus className="w-3.5 h-3.5 text-brand-orange" /> {showForm ? 'Cancel' : 'New Bulletin'}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="bg-slate-900/50 border border-blue-500/20 rounded-2xl p-5 space-y-4">
-          <h3 className="text-sm font-bold text-blue-400">Publish New Announcement</h3>
+        <form onSubmit={handleCreate} className="space-y-4">
+          <h3 className="text-sm font-bold text-[#001F5E]">Publish New Announcement</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Title *</label>
+              <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Title *</label>
               <input required className={inputCls} placeholder="e.g. Admit Card Release Timeline" value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} />
             </div>
             <div className="col-span-2">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Content *</label>
+              <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Content *</label>
               <textarea required className={textareaCls} rows={4} placeholder="Announcement content detail..." value={form.content} onChange={e => setForm(p => ({...p, content: e.target.value}))} />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Category</label>
+              <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Category</label>
               <select className={inputCls} value={form.category} onChange={e => setForm(p => ({...p, category: e.target.value}))}>
                 <option value="General">General</option>
                 <option value="Schedule">Schedule</option>
@@ -672,7 +1041,7 @@ function AnnouncementsPage() {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Target Audience</label>
+              <label className="text-[10px] font-bold text-slate-555 uppercase tracking-widest block mb-1">Target Audience</label>
               <select className={inputCls} value={form.targetAudience} onChange={e => setForm(p => ({...p, targetAudience: e.target.value}))}>
                 <option value="All">All</option>
                 <option value="Junior">Junior</option>
@@ -685,14 +1054,14 @@ function AnnouncementsPage() {
               <input 
                 id="isPinned"
                 type="checkbox" 
-                className="rounded border-white/10 bg-slate-900 text-blue-500 focus:ring-0 focus:ring-offset-0" 
+                className="rounded border-slate-300 bg-white text-brand-orange focus:ring-0 focus:ring-offset-0" 
                 checked={form.isPinned} 
                 onChange={e => setForm(p => ({...p, isPinned: e.target.checked}))} 
               />
-              <label htmlFor="isPinned" className="text-xs font-semibold text-slate-350 cursor-pointer">Pin to Landing Page Highlights</label>
+              <label htmlFor="isPinned" className="text-xs font-bold text-slate-700 cursor-pointer">Pin to Landing Page Highlights</label>
             </div>
           </div>
-          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
+          <button type="submit" disabled={saving} className="btn-primary">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {saving ? 'Publishing…' : 'Publish Bulletin'}
           </button>
@@ -703,31 +1072,31 @@ function AnnouncementsPage() {
         {loading
           ? Array.from({length:4}).map((_,i) => (
               <div key={i} className="admin-card p-5 animate-pulse space-y-3">
-                <div className="h-3 w-20 bg-slate-800 rounded" />
-                <div className="h-5 w-3/4 bg-slate-800 rounded" />
-                <div className="h-3 w-1/2 bg-slate-800 rounded" />
+                <div className="h-3 w-20 bg-slate-100 rounded" />
+                <div className="h-5 w-3/4 bg-slate-100 rounded" />
+                <div className="h-3 w-1/2 bg-slate-100 rounded" />
               </div>
             ))
           : filtered.map(a => (
-              <div key={a._id} className={`admin-card p-5 space-y-3 border flex flex-col justify-between ${a.isPinned ? 'border-amber-500/20' : 'border-white/5'}`}>
+              <div key={a._id} className={`admin-card p-5 space-y-3 border flex flex-col justify-between ${a.isPinned ? 'border-brand-orange/30' : 'border-slate-200/60'}`}>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${CATEGORY_BADGE[a.category] || 'badge-slate'}`}>
                       {a.category}
                     </span>
-                    {a.isPinned && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                    {a.isPinned && <Sparkles className="w-3.5 h-3.5 text-brand-orange" />}
                   </div>
-                  <p className="text-sm font-semibold text-slate-100 leading-snug">{a.title}</p>
-                  <p className="text-xs text-slate-400 leading-relaxed font-light">{a.content}</p>
+                  <p className="text-sm font-bold text-slate-800 leading-snug">{a.title}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">{a.content}</p>
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-slate-500 pt-3 border-t border-white/5 mt-2">
+                <div className="flex items-center justify-between text-[10px] text-slate-500 pt-3 border-t border-slate-100 mt-2">
                   <span>Audience: {a.targetAudience || 'All'}</span>
                   <div className="flex items-center gap-3">
                     <span>{fmtDate(a.publishedAt)}</span>
                     <button 
                       onClick={() => handleDelete(a._id)}
                       disabled={deleting === a._id}
-                      className="text-rose-400 hover:text-rose-350 font-bold underline cursor-pointer disabled:opacity-50"
+                      className="text-red-500 hover:text-red-700 font-bold underline cursor-pointer disabled:opacity-50"
                     >
                       {deleting === a._id ? 'Deleting...' : 'Delete'}
                     </button>
@@ -740,7 +1109,6 @@ function AnnouncementsPage() {
   );
 }
 
-// ─────────────────────────────────────────────
 // Page: Results
 // ─────────────────────────────────────────────
 function ResultsPage() {
@@ -750,11 +1118,13 @@ function ResultsPage() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving]   = useState(false);
   const [deleting, setDeleting] = useState(null);
-  const [registrations, setRegistrations] = useState([]);
-  const [loadingRegs, setLoadingRegs] = useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [olympiads, setOlympiads]       = useState([]);
+  const [loadingOptions, setLoadingOptions] = useState(false);
 
   const [form, setForm] = useState({
-    registrationId: '',
+    participantId: '',
+    olympiadId: '',
     rollNumber: '',
     logicalReasoning: 0,
     algorithmicThinking: 0,
@@ -780,56 +1150,60 @@ function ResultsPage() {
     }
   };
 
-  const loadRegistrations = async () => {
-    setLoadingRegs(true);
+  const loadOptions = async () => {
+    setLoadingOptions(true);
     try {
-      const res = await registrationAPI.list({ limit: 100 });
-      const list = res?.data?.data || res?.data || [];
-      setRegistrations(Array.isArray(list) ? list : []);
+      const [pRes, oRes] = await Promise.all([
+        participantAPI.list({ limit: 200 }),
+        olympiadAPI.list()
+      ]);
+      setParticipants(pRes?.data?.data?.participants || pRes?.data?.participants || []);
+      setOlympiads(oRes?.data?.data?.olympiads || oRes?.data?.data || oRes?.data || []);
     } catch (e) {
       console.error(e);
     } finally {
-      setLoadingRegs(false);
+      setLoadingOptions(false);
     }
   };
 
   useEffect(() => {
     load();
-    loadRegistrations();
+    loadOptions();
   }, []);
 
-  const handleRegChange = (regId) => {
-    const reg = registrations.find(r => r._id === regId);
-    if (!reg) return;
-    const studentClass = reg.studentId?.class || '10';
+  const handleParticipantChange = (pId) => {
+    const p = participants.find(x => x._id === pId);
+    if (!p) return;
+    const pClass = p.class || '10';
     let prefix = 'SR';
-    if (['6', '7', '8'].includes(studentClass)) prefix = 'JR';
-    else if (studentClass === 'UG') prefix = 'MS';
+    if (['6', '7', '8'].includes(pClass)) prefix = 'JR';
+    else if (pClass === 'UG') prefix = 'MS';
     const rand = Math.floor(100 + Math.random() * 900);
     const generatedRoll = `BAIO-2026-${prefix}-${rand}`;
     setForm(p => ({
       ...p,
-      registrationId: regId,
+      participantId: pId,
       rollNumber: generatedRoll
     }));
   };
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.registrationId) {
-      alert('Please select a student registration.');
+    if (!form.participantId) {
+      alert('Please select a participant student.');
       return;
     }
-    const reg = registrations.find(r => r._id === form.registrationId);
-    if (!reg) return;
+    if (!form.olympiadId) {
+      alert('Please select an Olympiad event.');
+      return;
+    }
 
     setSaving(true);
     try {
       const totalMarks = Number(form.logicalReasoning) + Number(form.algorithmicThinking) + Number(form.aiCore);
       const payload = {
-        registrationId: form.registrationId,
-        studentId: reg.studentId?._id || reg.studentId,
-        olympiadId: reg.olympiadId?._id || reg.olympiadId,
+        participantId: form.participantId,
+        olympiadId: form.olympiadId,
         rollNumber: form.rollNumber,
         scores: {
           logicalReasoning: Number(form.logicalReasoning),
@@ -852,7 +1226,8 @@ function ResultsPage() {
       await resultAPI.create(payload);
       setShowForm(false);
       setForm({
-        registrationId: '',
+        participantId: '',
+        olympiadId: '',
         rollNumber: '',
         logicalReasoning: 0,
         algorithmicThinking: 0,
@@ -887,7 +1262,7 @@ function ResultsPage() {
 
   const filtered = data.filter(r => {
     const q = query.toLowerCase();
-    const studentName = r.studentId?.name || r.studentName || '';
+    const studentName = r.participantId?.name || r.studentName || '';
     return (r.rollNumber || '').toLowerCase().includes(q) ||
            studentName.toLowerCase().includes(q);
   });
@@ -910,16 +1285,29 @@ function ResultsPage() {
         <form onSubmit={handleCreate} className="bg-slate-900/50 border border-blue-500/20 rounded-2xl p-5 space-y-4 text-left">
           <h3 className="text-sm font-bold text-blue-400">Add Student Scorecard</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Select Registration *</label>
-              <select required className={inputCls} value={form.registrationId} onChange={e => handleRegChange(e.target.value)}>
-                <option value="">-- Choose registered student --</option>
-                {registrations.map(r => (
-                  <option key={r._id} value={r._id}>
-                    {r.studentId?.name || 'Student'} ({r.olympiadId?.title || 'Olympiad'}) - Reg: {r.registrationNumber}
-                  </option>
-                ))}
-              </select>
+            <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Select Participant Student *</label>
+                <select required className={inputCls} value={form.participantId} onChange={e => handleParticipantChange(e.target.value)}>
+                  <option value="">-- Choose student participant --</option>
+                  {participants.map(p => (
+                    <option key={p._id} value={p._id}>
+                      {p.name} (Class {p.class} - {p.schoolId?.name || 'School'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Select Olympiad Event *</label>
+                <select required className={inputCls} value={form.olympiadId} onChange={e => setForm(p => ({ ...p, olympiadId: e.target.value }))}>
+                  <option value="">-- Choose Olympiad Event --</option>
+                  {olympiads.map(o => (
+                    <option key={o._id} value={o._id}>
+                      {o.title} ({o.category})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div>
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Roll Number *</label>
@@ -983,7 +1371,7 @@ function ResultsPage() {
               <label htmlFor="isPublished" className="text-xs font-semibold text-slate-350 cursor-pointer">Publish Result Instantly</label>
             </div>
           </div>
-          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer">
+          <button type="submit" disabled={saving} className="btn-primary">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {saving ? 'Saving scorecard…' : 'Save Scorecard'}
           </button>
@@ -995,7 +1383,7 @@ function ResultsPage() {
           {filtered.map(r => (
             <tr key={r._id}>
               <td className="py-3.5 pr-4 font-mono text-[10px] text-slate-400">{r.rollNumber}</td>
-              <td className="py-3.5 pr-4 font-semibold text-slate-100">{r.studentId?.name || r.studentName || '—'}</td>
+              <td className="py-3.5 pr-4 font-semibold text-slate-100">{r.participantId?.name || r.studentName || '—'}</td>
               <td className="py-3.5 pr-4 text-slate-400 max-w-[150px] truncate">{r.olympiadId?.title || r.olympiadName || '—'}</td>
               <td className="py-3.5 pr-4 text-slate-300 font-semibold">{r.scores?.totalMarksObtained ?? '—'}</td>
               <td className="py-3.5 pr-4 text-slate-300">{r.percentage}%</td>
@@ -1365,7 +1753,7 @@ function CMSPage() {
             <button
               onClick={save}
               disabled={saving || loading}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer"
+              className="btn-primary"
             >
               {saving
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
@@ -1420,8 +1808,7 @@ function CMSPage() {
 const PAGE_MAP = {
   dashboard:     DashboardPage,
   olympiads:     OlympiadsPage,
-  registrations: RegistrationsPage,
-  students:      StudentsPage,
+  participants:  ParticipantsPage,
   schools:       SchoolsPage,
   announcements: AnnouncementsPage,
   results:       ResultsPage,
@@ -1429,8 +1816,6 @@ const PAGE_MAP = {
   cms:           CMSPage,
 };
 
-import { useAdminAuth } from './context/AuthContext';
-import LoginPage from './pages/LoginPage';
 
 export default function App() {
   const { isAuthenticated, loading: authLoading } = useAdminAuth();
@@ -1447,8 +1832,8 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[hsl(230,25%,5%)]">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] text-[#001F5E]">
+        <Loader2 className="w-8 h-8 text-brand-orange animate-spin" />
       </div>
     );
   }
@@ -1460,7 +1845,7 @@ export default function App() {
   const PageComponent = PAGE_MAP[page] || DashboardPage;
 
   return (
-    <div className="min-h-screen flex bg-[hsl(230,25%,5%)] text-slate-100 font-sans">
+    <div className="min-h-screen flex bg-[#FAF9F6] text-slate-800 font-sans">
       {/* Sidebar */}
       <Sidebar
         active={page}
@@ -1475,7 +1860,7 @@ export default function App() {
 
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto" key={refreshKey}>
           {/* Ambient glow */}
-          <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-48 bg-blue-600/5 rounded-full blur-3xl pointer-events-none z-0" />
+          <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-48 bg-brand-orange/5 rounded-full blur-3xl pointer-events-none z-0" />
           <div className="relative z-10">
             <PageComponent />
           </div>

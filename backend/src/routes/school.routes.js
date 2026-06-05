@@ -19,6 +19,10 @@ const {
   getSchoolById,
   verifySchool,
   listPublicSchools,
+  addParticipants,
+  getParticipants,
+  getSchoolParticipantsAdmin,
+  listAllParticipantsAdmin,
 } = require('../controllers/school.controller');
 
 // Middleware
@@ -51,9 +55,23 @@ router.get('/me', protectSchool, getOwnProfile);
 // PATCH /api/v1/schools/me
 router.patch('/me', protectSchool, validate(updateSchoolProfileSchema), updateOwnProfile);
 
+// POST /api/v1/schools/me/participants  — submit a batch of students
+router.post('/me/participants', protectSchool, addParticipants);
+
+// GET  /api/v1/schools/me/participants  — list submitted participants
+router.get('/me/participants', protectSchool, getParticipants);
+
 /* ══════════════════════════════════════════════════════════════════════════════
    ADMIN ROUTES
    ══════════════════════════════════════════════════════════════════════════════ */
+
+// GET /api/v1/schools/admin/participants — list all participants globally
+router.get(
+  '/admin/participants',
+  protectAdmin,
+  requirePermission('users:read'),
+  listAllParticipantsAdmin
+);
 
 // GET /api/v1/schools  — list all (with filters + pagination)
 router.get(
@@ -62,6 +80,14 @@ router.get(
   requirePermission('users:read'),
   validate(listSchoolsQuerySchema, 'query'),
   listSchools
+);
+
+// GET /api/v1/schools/:id/participants — list school-specific participants
+router.get(
+  '/:id/participants',
+  protectAdmin,
+  requirePermission('users:read'),
+  getSchoolParticipantsAdmin
 );
 
 // GET /api/v1/schools/:id

@@ -66,7 +66,7 @@ export default function Hero() {
           {/* CTAs */}
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <Link
-              to="/student/login"
+              to="/register"
               className="group"
             >
               <LiquidButton
@@ -74,13 +74,13 @@ export default function Hero() {
                 size="xl"
               >
                 <span className="flex items-center gap-2">
-                  Register &amp; Participate
+                  Register School
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
               </LiquidButton>
             </Link>
             <Link
-              to="/olympiads"
+              to="/olympiad"
               className="bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 text-slate-300 hover:text-white px-7 py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 text-sm"
             >
               Explore Syllabus

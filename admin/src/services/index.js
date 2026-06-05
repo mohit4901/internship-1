@@ -12,6 +12,7 @@
 export { authAPI }         from './authAPI';
 export { studentAPI }      from './studentAPI';
 export { schoolAPI }       from './schoolAPI';
+export { participantAPI }  from './participantAPI';
 export { olympiadAPI }     from './olympiadAPI';
 export { announcementAPI } from './announcementAPI';
 export { resultAPI }       from './resultAPI';

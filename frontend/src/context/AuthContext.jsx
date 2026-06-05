@@ -1,9 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
-  studentLogin,
-  studentLogout,
-  studentRegister,
-  getStudentMe,
   schoolLogin,
   schoolLogout,
   schoolRegister,
@@ -26,8 +22,7 @@ const loadUser  = ()      => {
 
 // ── Provider ───────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
-  const [user,    setUser]    = useState(loadUser);   // { _id, name, role, ... }
-  const [role,    setRole]    = useState(() => loadUser()?.role || null); // 'student' | 'school' | null
+  const [user,    setUser]    = useState(loadUser);
   const [loading, setLoading] = useState(true);
 
   // On mount: verify token still valid against the API
@@ -37,18 +32,13 @@ export function AuthProvider({ children }) {
       if (!stored) { setLoading(false); return; }
 
       try {
-        const res = stored.role === 'student'
-          ? await getStudentMe()
-          : await getSchoolMe();
-
+        const res   = await getSchoolMe();
         const fresh = res.data?.data;
         setUser(fresh);
-        setRole(fresh?.role || stored.role);
-        saveUser({ ...fresh, role: fresh?.role || stored.role });
+        saveUser({ ...fresh, role: 'school' });
       } catch {
         clearUser();
         setUser(null);
-        setRole(null);
       } finally {
         setLoading(false);
       }
@@ -59,32 +49,6 @@ export function AuthProvider({ children }) {
 
   // ── Actions ──────────────────────────────────────────────────────────────────
 
-  const loginStudent = useCallback(async (credentials) => {
-    const res  = await studentLogin(credentials);
-    const data = res.data?.data;
-    const token = data?.token;
-    const me    = data?.student || data?.user || data;
-
-    if (token) localStorage.setItem(LS_TOKEN_KEY, token);
-    const enriched = { ...me, role: 'student' };
-    setUser(enriched);
-    setRole('student');
-    saveUser(enriched);
-    return enriched;
-  }, []);
-
-  const registerStudent = useCallback(async (payload) => {
-    const res   = await studentRegister(payload);
-    return res.data;
-  }, []);
-
-  const logoutStudent = useCallback(async () => {
-    try { await studentLogout(); } catch { /* ignore */ }
-    clearUser();
-    setUser(null);
-    setRole(null);
-  }, []);
-
   const loginSchool = useCallback(async (credentials) => {
     const res   = await schoolLogin(credentials);
     const data  = res.data?.data;
@@ -94,7 +58,6 @@ export function AuthProvider({ children }) {
     if (token) localStorage.setItem(LS_TOKEN_KEY, token);
     const enriched = { ...me, role: 'school' };
     setUser(enriched);
-    setRole('school');
     saveUser(enriched);
     return enriched;
   }, []);
@@ -108,33 +71,21 @@ export function AuthProvider({ children }) {
     try { await schoolLogout(); } catch { /* ignore */ }
     clearUser();
     setUser(null);
-    setRole(null);
   }, []);
-
-  const logout = useCallback(() => {
-    if (role === 'school') return logoutSchool();
-    return logoutStudent();
-  }, [role, logoutSchool, logoutStudent]);
 
   // ── Derived Helpers ───────────────────────────────────────────────────────────
   const isAuthenticated = Boolean(user);
-  const isStudent       = role === 'student';
-  const isSchool        = role === 'school';
+  const isSchool        = user?.role === 'school';
 
   const value = {
     user,
-    role,
     loading,
     isAuthenticated,
-    isStudent,
     isSchool,
-    loginStudent,
-    registerStudent,
-    logoutStudent,
     loginSchool,
     registerSchool,
     logoutSchool,
-    logout,
+    logout: logoutSchool,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -10,13 +10,6 @@ const {
 } = require('../controllers/auth.admin.controller');
 
 const {
-  registerStudent,
-  loginStudent,
-  logoutStudent,
-  getStudentProfile,
-} = require('../controllers/auth.student.controller');
-
-const {
   registerSchool,
   loginSchool,
   logoutSchool,
@@ -31,13 +24,11 @@ const {
 } = require('../controllers/forgotPassword.controller');
 
 // Middleware
-const { protectAdmin, protectStudent, protectSchool } = require('../middlewares/auth.middleware');
+const { protectAdmin, protectSchool } = require('../middlewares/auth.middleware');
 const { validate } = require('../middlewares/validate.middleware');
 const {
   adminRegisterSchema,
   adminLoginSchema,
-  studentRegisterSchema,
-  studentLoginSchema,
   schoolRegisterSchema,
   schoolLoginSchema,
 } = require('../validators/auth.validators');
@@ -61,20 +52,6 @@ router.post('/admin/forgot-password/question',     validate(forgotPasswordStep1S
 router.post('/admin/forgot-password/verify',       validate(forgotPasswordStep2Schema), verifySecurityAnswer('admin'));
 router.post('/admin/forgot-password/reset',        validate(resetPasswordSchema),       resetPassword('admin'));
 router.post('/admin/forgot-password/set-question', protectAdmin, validate(setSecurityQuestionSchema), setSecurityQuestion('admin'));
-
-/* ════════════════════════════════════════════
-   STUDENT AUTH ROUTES  —  /api/v1/auth/student
-   ════════════════════════════════════════════ */
-router.post('/student/register', validate(studentRegisterSchema), registerStudent);
-router.post('/student/login',    validate(studentLoginSchema),    loginStudent);
-router.post('/student/logout',   protectStudent,                  logoutStudent);
-router.get( '/student/me',       protectStudent,                  getStudentProfile);
-
-// Forgot Password — Student (3-step flow)
-router.post('/student/forgot-password/question',     validate(forgotPasswordStep1Schema), getSecurityQuestion('student'));
-router.post('/student/forgot-password/verify',       validate(forgotPasswordStep2Schema), verifySecurityAnswer('student'));
-router.post('/student/forgot-password/reset',        validate(resetPasswordSchema),       resetPassword('student'));
-router.post('/student/forgot-password/set-question', protectStudent, validate(setSecurityQuestionSchema), setSecurityQuestion('student'));
 
 /* ════════════════════════════════════════════
    SCHOOL AUTH ROUTES  —  /api/v1/auth/school

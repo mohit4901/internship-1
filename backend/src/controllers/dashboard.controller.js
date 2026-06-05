@@ -1,7 +1,7 @@
-const Student = require('../models/Student');
 const School = require('../models/School');
 const Olympiad = require('../models/Olympiad');
-const OlympiadRegistration = require('../models/OlympiadRegistration');
+const Participant = require('../models/Participant');
+const Result = require('../models/Result');
 const { ApiResponse } = require('../utils/apiResponse');
 const { asyncHandler } = require('../utils/asyncHandler');
 
@@ -12,44 +12,35 @@ const { asyncHandler } = require('../utils/asyncHandler');
    ═══════════════════════════════════════════════════════════════════════════════ */
 const getDashboardStats = asyncHandler(async (req, res) => {
   const [
-    totalStudents,
     totalSchools,
     totalOlympiads,
-    totalRegistrations,
+    totalParticipants,
+    totalResults,
 
     pendingSchoolsCount,
     verifiedSchoolsCount,
 
-    paidRegistrationsCount,
-    pendingRegistrationsCount,
-
-    recentRegistrations,
-    recentStudents
+    recentSchools,
+    recentParticipants
   ] = await Promise.all([
     // Main counts
-    Student.countDocuments({}),
     School.countDocuments({}),
     Olympiad.countDocuments({}),
-    OlympiadRegistration.countDocuments({}),
+    Participant.countDocuments({}),
+    Result.countDocuments({}),
 
     // School breakdowns
     School.countDocuments({ isVerified: false }),
     School.countDocuments({ isVerified: true }),
 
-    // Registration payment breakdowns
-    OlympiadRegistration.countDocuments({ paymentStatus: 'Paid' }),
-    OlympiadRegistration.countDocuments({ paymentStatus: 'Pending' }),
-
     // Recent activity logs
-    OlympiadRegistration.find({})
-      .populate('studentId', 'fullName email')
-      .populate('olympiadId', 'title')
+    School.find({})
       .sort('-createdAt')
       .limit(5)
       .lean(),
 
-    Student.find({})
-      .select('fullName email createdAt')
+    Participant.find({})
+      .populate('schoolId', 'name')
       .sort('-createdAt')
       .limit(5)
       .lean()
@@ -60,24 +51,20 @@ const getDashboardStats = asyncHandler(async (req, res) => {
       200,
       {
         cards: {
-          totalStudents,
           totalSchools,
           totalOlympiads,
-          totalRegistrations,
+          totalParticipants,
+          totalResults,
         },
         breakdowns: {
           schools: {
             verified: verifiedSchoolsCount,
             pending: pendingSchoolsCount
-          },
-          registrations: {
-            paid: paidRegistrationsCount,
-            pending: pendingRegistrationsCount
           }
         },
         recentActivity: {
-          registrations: recentRegistrations,
-          students: recentStudents
+          schools: recentSchools,
+          participants: recentParticipants
         }
       },
       'Dashboard analytics retrieved successfully.'
@@ -88,3 +75,4 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 module.exports = {
   getDashboardStats,
 };
+

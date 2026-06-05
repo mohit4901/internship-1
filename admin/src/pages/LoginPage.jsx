@@ -1,6 +1,32 @@
 import React, { useState } from 'react';
 import { useAdminAuth } from '../context/AuthContext';
-import { Shield, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowRight, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+/* ── Brand Logo (matching Navbar/Footer) ── */
+function BAIOLogo({ className = '' }) {
+  return (
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <circle cx="20" cy="20" r="17" stroke="#FF8C00" strokeWidth="2.5" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const x1 = 20 + 15 * Math.cos(rad);
+        const y1 = 20 + 15 * Math.sin(rad);
+        const x2 = 20 + 19 * Math.cos(rad);
+        const y2 = 20 + 19 * Math.sin(rad);
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="3" strokeLinecap="round" />;
+      })}
+      <circle cx="20" cy="20" r="10" fill="#001F5E" />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const x2 = 20 + 8 * Math.cos(rad);
+        const y2 = 20 + 8 * Math.sin(rad);
+        return <line key={i} x1="20" y1="20" x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="1.2" strokeLinecap="round" />;
+      })}
+      <circle cx="20" cy="20" r="2.5" fill="#FF8C00" />
+    </svg>
+  );
+}
 
 export default function LoginPage() {
   const { login } = useAdminAuth();
@@ -15,7 +41,6 @@ export default function LoginPage() {
     setError(null);
     try {
       await login({ email, password });
-      // On success, the AuthContext will update state and App will re-render
     } catch (err) {
       setError(err?.message || 'Invalid credentials or server error.');
     } finally {
@@ -24,29 +49,47 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[hsl(230,25%,5%)] text-slate-100 p-4">
-      {/* Ambient Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] text-slate-800 p-4 relative overflow-hidden py-12 selection:bg-brand-orange selection:text-white">
+      {/* Floating Background Shapes */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-10 w-8 h-8 rounded-full bg-brand-orange/10 floating-slow-y" />
+        <div className="absolute top-1/3 right-12 w-12 h-12 rounded-full bg-brand-green/10 floating-slow-x" />
+        <div className="absolute top-10 right-1/4 text-brand-orange/20 floating-rotate">
+          <Sparkles className="w-10 h-10" />
+        </div>
+      </div>
       
-      <div className="relative z-10 w-full max-w-md bg-slate-900/60 border border-white/10 p-8 rounded-2xl shadow-2xl backdrop-blur-xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-600/20 border border-blue-500/30 mb-4">
-            <Shield className="w-7 h-7 text-blue-400" />
+      <div className="w-full max-w-md space-y-8 relative z-10">
+        
+        {/* Brand */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-3 no-underline group">
+            <BAIOLogo className="w-11 h-11" />
+            <div className="text-left">
+              <span className="font-heading font-extrabold text-2xl text-brand-navy block tracking-tight">BAIO</span>
+              <p className="text-[9px] text-brand-orange tracking-widest font-extrabold uppercase leading-none mt-0.5">Bharat AI Olympiad</p>
+            </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-white">Admin Portal</h1>
-          <p className="text-sm text-slate-400 mt-2">Sign in to manage the platform</p>
+          <div>
+            <span className="brand-badge brand-badge-navy mb-2">
+              Administration
+            </span>
+            <h1 className="font-heading font-extrabold text-3xl text-brand-navy leading-tight">Admin Portal</h1>
+            <p className="text-slate-500 text-sm mt-1 max-w-xs mx-auto">Sign in to manage the BAIO competition platform.</p>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-rose-300">{error}</p>
+          <div className="p-4 bg-red-50 border-2 border-red-200 text-red-700 text-xs font-bold rounded-2xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm">{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+        {/* Card Form */}
+        <form onSubmit={handleSubmit} className="bg-white border-4 border-brand-navy rounded-3xl p-8 edu-shadow-orange space-y-5">
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-brand-navy">
               Email Address
             </label>
             <input
@@ -54,13 +97,13 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-900/60 border border-white/5 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all"
+              className="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-950 focus:outline-none focus:border-brand-navy placeholder:text-slate-300 font-semibold"
               placeholder="admin@baio.in"
             />
           </div>
           
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+          <div className="space-y-2">
+            <label className="block text-sm font-bold text-brand-navy">
               Password
             </label>
             <input
@@ -68,7 +111,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-900/60 border border-white/5 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-all"
+              className="w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-950 focus:outline-none focus:border-brand-navy placeholder:text-slate-300 font-semibold"
               placeholder="••••••••"
             />
           </div>
@@ -76,9 +119,10 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-bold px-5 py-3 rounded-xl transition-all"
+            className="btn-primary w-full justify-center py-3.5 shadow-md text-sm disabled:opacity-60 cursor-pointer"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Secure Sign In'}
+            {!loading && <ArrowRight className="w-4 h-4" />}
           </button>
         </form>
       </div>
