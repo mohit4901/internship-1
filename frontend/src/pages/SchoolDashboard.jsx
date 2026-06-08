@@ -7,29 +7,16 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getParticipants, addParticipants, getSchoolMe } from '../services/auth.service';
+import logoImg from '../assets/logo.jpg';
 
 /* ── Brand Logo (matching Navbar/Footer) ── */
 function BAIOLogo({ className = '' }) {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <circle cx="20" cy="20" r="17" stroke="#FF8C00" strokeWidth="2.5" />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x1 = 20 + 15 * Math.cos(rad);
-        const y1 = 20 + 15 * Math.sin(rad);
-        const x2 = 20 + 19 * Math.cos(rad);
-        const y2 = 20 + 19 * Math.sin(rad);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="3" strokeLinecap="round" />;
-      })}
-      <circle cx="20" cy="20" r="10" fill="#001F5E" />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x2 = 20 + 8 * Math.cos(rad);
-        const y2 = 20 + 8 * Math.sin(rad);
-        return <line key={i} x1="20" y1="20" x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="1.2" strokeLinecap="round" />;
-      })}
-      <circle cx="20" cy="20" r="2.5" fill="#FF8C00" />
-    </svg>
+    <img 
+      src={logoImg} 
+      alt="BAIO Logo" 
+      className={`${className} object-contain mix-blend-multiply`} 
+    />
   );
 }
 
@@ -97,12 +84,8 @@ export default function SchoolDashboardPage() {
       <header className="sticky top-0 z-30 bg-white/95 border-b-4 border-brand-navy px-6 py-4 backdrop-blur-md shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 no-underline group">
-            <BAIOLogo className="w-8 h-8" />
-            <div className="flex items-baseline">
-              <span className="font-extrabold text-brand-navy text-xl tracking-tight">BAIO</span>
-              <span className="text-[#FF8C00] text-xl font-bold ml-0.5">•</span>
-              <span className="text-slate-400 text-xs font-semibold ml-2 pl-2 border-l border-slate-200">School Portal</span>
-            </div>
+            <BAIOLogo className="h-8 md:h-9 w-auto" />
+            <span className="text-slate-400 text-xs font-semibold ml-2 pl-2 border-l border-slate-200">School Portal</span>
           </Link>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex flex-col items-end">

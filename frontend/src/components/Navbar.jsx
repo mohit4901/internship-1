@@ -5,28 +5,15 @@ import {
   Home, Info, Trophy, School, HelpCircle, Mail, LogOut, BookOpen
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import logoImg from '../assets/logo.jpg';
 
 function BAIOLogo({ className = '' }) {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <circle cx="20" cy="20" r="17" stroke="#FF8C00" strokeWidth="2.5" />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x1 = 20 + 15 * Math.cos(rad);
-        const y1 = 20 + 15 * Math.sin(rad);
-        const x2 = 20 + 19 * Math.cos(rad);
-        const y2 = 20 + 19 * Math.sin(rad);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="3" strokeLinecap="round" />;
-      })}
-      <circle cx="20" cy="20" r="10" fill="#001F5E" />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x2 = 20 + 8 * Math.cos(rad);
-        const y2 = 20 + 8 * Math.sin(rad);
-        return <line key={i} x1="20" y1="20" x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="1.2" strokeLinecap="round" />;
-      })}
-      <circle cx="20" cy="20" r="2.5" fill="#FF8C00" />
-    </svg>
+    <img 
+      src={logoImg} 
+      alt="BAIO Logo" 
+      className={`${className} object-contain mix-blend-multiply`} 
+    />
   );
 }
 
@@ -51,17 +38,11 @@ export default function Navbar() {
     <>
       {/* ─── DESKTOP FLOATING BAR ────────────────────────────────────── */}
       <div className="hidden md:block fixed top-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-5xl px-6">
-        <div className="flex items-center justify-between bg-white/95 border border-slate-200/80 backdrop-blur-md py-2.5 px-6 rounded-full shadow-lg pointer-events-auto">
+        <div className="flex items-center justify-between bg-white border border-slate-200/80 py-1.5 px-6 rounded-full shadow-lg pointer-events-auto">
           
           {/* Logo Section */}
-          <Link to="/" className="flex items-center gap-2 no-underline shrink-0 group">
-            <BAIOLogo className="w-7 h-7" />
-            <div className="flex items-baseline">
-              <span className="font-extrabold text-[#001F5E] text-lg tracking-tight">
-                BAIO
-              </span>
-              <span className="text-[#FF8C00] text-lg font-bold ml-0.5">•</span>
-            </div>
+          <Link to="/" className="flex items-center no-underline shrink-0 group">
+            <BAIOLogo className="h-12 md:h-14 w-auto" />
           </Link>
 
           {/* Desktop Links with Framer Motion Lamp glow */}
@@ -139,10 +120,9 @@ export default function Navbar() {
       </div>
 
       {/* ─── MOBILE TOP HEADER ───────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 border-b border-slate-100 backdrop-blur-md px-6 py-3.5 flex items-center justify-between shadow-sm">
-        <Link to="/" className="flex items-center gap-2 no-underline">
-          <BAIOLogo className="w-7 h-7" />
-          <span className="font-extrabold text-[#001F5E] text-lg tracking-tight">BAIO</span>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 py-2.5 flex items-center justify-between shadow-sm">
+        <Link to="/" className="flex items-center no-underline">
+          <BAIOLogo className="h-10 w-auto" />
         </Link>
         
         <div className="flex items-center gap-2">

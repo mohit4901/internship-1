@@ -2,29 +2,16 @@ import React, { useState } from 'react';
 import { useAdminAuth } from '../context/AuthContext';
 import { ArrowRight, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logoImg from '../assets/logo.jpg';
 
 /* ── Brand Logo (matching Navbar/Footer) ── */
 function BAIOLogo({ className = '' }) {
   return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-      <circle cx="20" cy="20" r="17" stroke="#FF8C00" strokeWidth="2.5" />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x1 = 20 + 15 * Math.cos(rad);
-        const y1 = 20 + 15 * Math.sin(rad);
-        const x2 = 20 + 19 * Math.cos(rad);
-        const y2 = 20 + 19 * Math.sin(rad);
-        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="3" strokeLinecap="round" />;
-      })}
-      <circle cx="20" cy="20" r="10" fill="#001F5E" />
-      {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x2 = 20 + 8 * Math.cos(rad);
-        const y2 = 20 + 8 * Math.sin(rad);
-        return <line key={i} x1="20" y1="20" x2={x2} y2={y2} stroke="#FF8C00" strokeWidth="1.2" strokeLinecap="round" />;
-      })}
-      <circle cx="20" cy="20" r="2.5" fill="#FF8C00" />
-    </svg>
+    <img 
+      src={logoImg} 
+      alt="BAIO Logo" 
+      className={`${className} object-contain mix-blend-multiply`} 
+    />
   );
 }
 
@@ -63,12 +50,8 @@ export default function LoginPage() {
         
         {/* Brand */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-3 no-underline group">
-            <BAIOLogo className="w-11 h-11" />
-            <div className="text-left">
-              <span className="font-heading font-extrabold text-2xl text-brand-navy block tracking-tight">BAIO</span>
-              <p className="text-[9px] text-brand-orange tracking-widest font-extrabold uppercase leading-none mt-0.5">Bharat AI Olympiad</p>
-            </div>
+          <div className="inline-flex items-center no-underline group justify-center">
+            <BAIOLogo className="h-12 md:h-14 w-auto" />
           </div>
           <div>
             <span className="brand-badge brand-badge-navy mb-2">
