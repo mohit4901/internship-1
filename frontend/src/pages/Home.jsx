@@ -16,6 +16,7 @@ import {
   School, Puzzle, Globe, Laptop, Activity, TrendingUp, Calendar, 
   FileSpreadsheet, ShieldAlert, Star, Trophy
 } from 'lucide-react';
+import logoImg from '../assets/logo.jpg';
 
 const wrap = (min, max, v) => {
   const range = max - min;
@@ -96,6 +97,45 @@ function ScrollVelocityMarquee() {
         BHARAT AI OLYMPIAD ✦ CBSE CTAI ALIGNED ✦ CLASSES 3 TO 8 ✦ ZERO SYLLABUS BURDEN ✦ DIAGNOSTIC READINESS REPORT ✦&nbsp;
       </VelocityText>
     </div>
+  );
+}
+
+function LogoShowcaseSection() {
+  return (
+    <section className="py-12 px-6 bg-[#FAF9F6] relative overflow-hidden select-none">
+      <div className="max-w-4xl mx-auto text-center space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-white border-4 border-[#001F5E] rounded-3xl p-8 md:p-12 shadow-[0_10px_0px_0px_#001F5E] flex flex-col items-center justify-center relative group"
+        >
+          {/* Subtle background circuit pattern */}
+          <div className="absolute inset-0 bg-[#FF8C00]/5 pointer-events-none circuit-bg opacity-35 rounded-[22px]" />
+          
+          <span className="relative z-10 inline-block bg-[#001F5E] text-white font-black text-[10px] tracking-widest px-4 py-1.5 rounded-full uppercase mb-6 shadow-sm">
+            Official Brand Mark
+          </span>
+          
+          {/* The Large Logo Image */}
+          <div className="relative z-10 w-full max-w-xl bg-white p-6 rounded-2xl border-2 border-slate-100 flex items-center justify-center shadow-inner overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]">
+            <img 
+              src={logoImg} 
+              alt="Bharat AI Olympiad Official Logo" 
+              className="h-28 md:h-44 w-auto object-contain mix-blend-multiply transition-all duration-300"
+            />
+          </div>
+          
+          <div className="relative z-10 mt-6 max-w-md">
+            <h3 className="font-heading font-extrabold text-xl text-[#001F5E]">Bharat AI Olympiad (BAIO)</h3>
+            <p className="text-slate-500 text-xs mt-1.5 font-semibold leading-relaxed">
+              The standardized national cognitive benchmark for AI literacy and computational thinking, aligned with the CBSE CTAI 2026-27 framework.
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 }
 
@@ -364,6 +404,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <LogoShowcaseSection />
 
       {/* ─── WHY BAIO - BENTO GRID ────────────────────────────────── */}
       <section className="py-16 px-6 bg-white border-y border-slate-150">
