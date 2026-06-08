@@ -1,211 +1,165 @@
-# Bharat AI Olympiad (BAIO) — Comprehensive Full-Stack Architecture & Internship Progress Report
+# Bharat AI Olympiad (BAIO) Platform
 
-Welcome to the documentation and system design manual for the **Bharat AI Olympiad (BAIO)** portal. This repository orchestrates a robust, highly resilient, and modern full-stack web ecosystem designed to support secure digital registrations, candidate benchmarking, physical exam room allocations, and national ranking algorithms for students across India.
+## Overview
+The Bharat AI Olympiad (BAIO) is a comprehensive platform designed for students from classes 3 to 8, aligned with the CBSE CTAI curriculum. The system facilitates school registrations, student enrollments, result tracking, and Olympiad administration.
+
+This repository contains the complete source code for the platform, divided into three distinct modules:
+1. **Frontend**: The public-facing application for schools and students.
+2. **Admin**: The internal dashboard for system administrators.
+3. **Backend**: The centralized Node.js API server powering both the frontend and admin applications.
 
 ---
 
-## 1. Complete System Architecture & HLD
+## System Architecture
 
-The BAIO system is structured as a high-availability, decoupled multi-tier architecture designed to survive extreme registration traffic spikes.
-
-### Detailed 3-Tier Physical Architecture Diagram
+The application follows a standard client-server architecture utilizing the MERN stack.
 
 ```mermaid
 graph TD
-    Client[Candidate & Admin Clients] <-->|HTTPS / WSS| CDN[Cloudflare CDN / Edge WAF]
-    CDN <-->|Static Assets| S3[AWS S3 / Assets Bucket]
-    CDN <-->|API Traffic| Gateway[Reverse Proxy / Nginx Gateway]
+    ClientFrontend[Frontend - React + Vite] -->|HTTPS REST| API[Backend - Express.js]
+    ClientAdmin[Admin Panel - React + Vite] -->|HTTPS REST| API
     
-    Gateway <-->|Rate Limited API Requests| LB[Load Balancer - HAProxy]
+    API -->|Mongoose| DB[(MongoDB)]
     
-    LB <-->|State-Free Session Routing| Node1[Express.js Engine Instance 1]
-    LB <-->|State-Free Session Routing| Node2[Express.js Engine Instance 2]
-    
-    Node1 <-->|Read-Through / Write-Aside| Cache[(Redis Cache Cluster)]
-    Node2 <-->|Read-Through / Write-Aside| Cache
-    
-    Node1 <-->|Mongoose Queries| Mongo[(MongoDB Sharded Cluster - Primary/Secondary)]
-    Node2 <-->|Mongoose Queries| Mongo
-```
-
----
-
-## 2. Core Workflows & System Sequence Designs
-
-### Sequence Diagram: Student Registration & Proctor Allocation
-
-This diagram illustrates the secure transaction lifecycle, database writes, and automated offline center seat mapping.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Student as Student Client
-    participant FE as React Frontend
-    participant API as Core Express Server
-    participant Cache as Redis Cache
-    participant DB as MongoDB Cluster
-    
-    Student->>FE: Fills registration & chooses track (Senior, etc.)
-    FE->>API: POST /api/v1/auth/register (Payload)
-    API->>DB: Write User Document (Unverified)
-    API-->>FE: JWT Authorization Handshake
-    Student->>FE: Selects local physical exam hub city
-    FE->>API: POST /api/v1/registrations/pay (Track Selection + City)
-    API->>API: Process mock-payment gateway transactions
-    API->>DB: Write Payment Record
-    
-    rect rgb(240, 248, 255)
-        note right of API: Center Allocation Daemon (KNN Algorithm)
-        API->>DB: Query center capacity in target city
-        DB-->>API: List of centers
-        API->>API: Allocate nearest available room + seat
-        API->>DB: Update candidate doc with center allocation
+    subgraph Authentication
+        JWT[JSON Web Tokens]
+        Bcrypt[Password Hashing]
     end
-    
-    API->>Cache: Invalidate center capacity keys
-    API-->>FE: Returns dynamic Admit Card payload
-    FE-->>Student: Display Admit Card + physical coordinates
+    API -.-> Authentication
+```
+
+### Core Technologies
+| Module | Technology Stack |
+| :--- | :--- |
+| **Frontend** | React, Vite, Tailwind CSS, Framer Motion, Context API |
+| **Admin** | React, Vite, Tailwind CSS, Context API |
+| **Backend** | Node.js, Express.js, JWT, Zod, Mongoose |
+| **Database** | MongoDB Atlas |
+
+---
+
+## Directory Structure
+
+The workspace is organized into a monorepo-style structure, isolating concerns while maintaining centralized management.
+
+```text
+baio1/
+├── admin/                  # Admin dashboard application
+│   ├── public/             # Static assets
+│   ├── src/                # React source code
+│   │   ├── components/     # UI components
+│   │   ├── layouts/        # Layout wrappers
+│   │   ├── pages/          # Application views
+│   │   └── services/       # API interaction layer
+│   └── vite.config.js      # Build configuration
+│
+├── frontend/               # Public frontend application
+│   ├── public/             # Static assets
+│   ├── src/                # React source code
+│   │   ├── components/     # Reusable UI components
+│   │   ├── context/        # Global state management
+│   │   ├── pages/          # Application views
+│   │   └── services/       # API interaction layer
+│   └── vite.config.js      # Build configuration
+│
+└── backend/                # API server
+    ├── src/
+    │   ├── config/         # Environment variables & DB connection
+    │   ├── controllers/    # Request handling logic
+    │   ├── middlewares/    # Custom Express middlewares
+    │   ├── models/         # Mongoose schemas
+    │   ├── routes/         # API endpoint definitions
+    │   ├── services/       # Business logic abstraction
+    │   └── validators/     # Zod validation schemas
+    └── package.json        # Dependencies and scripts
 ```
 
 ---
 
-##  3. Low-Level Database Schema Design (ERD)
+## Local Setup & Development
 
-The system leverages MongoDB for flexible document tracking, mapped via strictly typed Mongoose models.
+### 1. Prerequisites
+- **Node.js** (v18.x or higher)
+- **MongoDB** instance (Local or Atlas)
+- **Git**
 
-```mermaid
-erDiagram
-    USER ||--o| STUDENT_PROFILE : "has profile"
-    USER ||--o| MOCK_KIT_DOWNLOADS : "tracks"
-    STUDENT_PROFILE }|--|| CENTER_ALLOCATION : "assigned to"
-    STUDENT_PROFILE ||--o| EXAM_RESULT : "graded by"
-    ADMIN_USER ||--o| ANNOUNCEMENT : "publishes"
+### 2. Environment Variables
+Create `.env` files in the respective directories based on the `.env.example` templates.
 
-    USER {
-        ObjectId id PK
-        string email UK
-        string passwordHash
-        string role "Candidate | Admin | Proctor"
-        date createdAt
-    }
+**Backend (`backend/.env`)**
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+NODE_ENV=development
+```
 
-    STUDENT_PROFILE {
-        ObjectId id PK
-        ObjectId userId FK
-        string fullName
-        string division "Junior | Senior | Masters"
-        boolean isFeePaid
-        ObjectId centerId FK
-        string roomNumber
-        string seatNumber
-    }
+**Frontend (`frontend/.env`)**
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+```
 
-    CENTER_ALLOCATION {
-        ObjectId id PK
-        string hubName
-        string city
-        number capacityMax
-        number capacityCurrent
-        object coordinates
-    }
+**Admin (`admin/.env`)**
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+```
 
-    EXAM_RESULT {
-        ObjectId id PK
-        ObjectId profileId FK
-        number marksRaw
-        number percentileNational
-        string meritBadge "Bronze | Silver | Gold"
-    }
-    
-    ANNOUNCEMENT {
-        ObjectId id PK
-        string title
-        string body
-        string category "Emergency | Schedule | Info"
-        boolean isPinned
-        date publishedAt
-    }
+### 3. Installation & Execution
+
+Open three separate terminal windows to run the development servers concurrently.
+
+**Terminal 1: Backend**
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+**Terminal 2: Frontend**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Terminal 3: Admin**
+```bash
+cd admin
+npm install
+npm run dev
 ```
 
 ---
 
-## 4. Module Functionality & Feature Matrix
+## Core Modules & Workflows
 
-The full-stack codebase is organized into distinct functional scopes to serve three unique user groups:
+### Authentication Flow
+- The system employs Role-Based Access Control (RBAC).
+- Supported roles: `student`, `school`, `admin`.
+- Authentication is handled via JSON Web Tokens (JWT) transmitted over secure HTTP headers.
 
-| Module | Sub-Feature | Detailed Implementation | Status |
-| :--- | :--- | :--- | :---: |
-| **Frontend Portal** | Hero Interactive | Smooth cycling of educational taglines powered by spring animations. | [x] **Complete** |
-| | Live Update Feed | Dynamic fetching of announcements with offline caching and mock fallbacks. | [x] **Complete** |
-| | 3D Review Marquee | Dual-direction vertical 3D rotating student testimonials board. | [x] **Complete** |
-| | Division Selector | Categorized cards (Junior, Senior, Masters) with division-specific fees. | [x] **Complete** |
-| **Backend API Engine** | JWT Auth Controller | Secure HTTP-only cookie JWT validation and stateless auth sessions. | [x] **Complete** |
-| | Auto-Scheduler | Nightly triggers to update registration status and seats capacity. | [x] **Complete** |
-| | Center Tracker | API endpoints to query physical exam centers and allocation charts. | [x] **Complete** |
-| **Admin Control Desk**| Emergency Override | Admin button to instantly broadcast alert banners onto all student portals. | [x] **Complete** |
-| | Center Monitor | Live dashboard showing real-time candidate capacity per center. | [x] **Complete** |
+### Registration System
+- **Schools**: Can register their institution and receive approval from administrators.
+- **Students**: Can register individually or under their respective school codes.
+- All registrations undergo rigorous validation using Zod schemas on the backend.
 
----
+### Olympiad Management
+- Administrators define Olympiad schedules, subjects, and eligibility criteria.
+- Students can view available Olympiads and enroll based on their class level.
 
-##  5. Internship Progress Report: Accomplishments to Date
-
-Our pair programming team (collaborating with **Antigravity AI**, **Cursor**, and **21st.dev**) completed major engineering breakthroughs to stabilize the core frontend and backend paths.
-
-###  Milestones Achieved & Code Improvements
-
-> [!TIP]
-> **Performance Optimization:** Reverting complex and unneeded modules saved hundreds of kilobytes, making the application extremely light and fast to render on mobile networks.
-
-#### 1. JSX Parsing Reconstruct
-*   **The Issue:** A critical compilation error occurred due to a number-prefixed component tag name: `<3d-testimonials/>` (invalid JS identifier).
-*   **The Fix:** Refactored the file to [3d-testimonials.jsx](file:///Users/mohitmudgil/Desktop/baio1/frontend/src/components/ui/3d-testimonials.jsx), renamed the primary component to `Testimonials3D` (PascalCase), and imported it cleanly.
-
-#### 2. Bundle Reduction & Tree-Shaking
-*   **The Issue:** An experimental 3D WebGL Three.js background was adding over 500kB to the core bundle, causing latency on mobile devices.
-*   **The Fix:** Deleted the heavy Three.js asset files and successfully reverted the main landing canvas to a sleek, high-contrast, pure-CSS theme. The production JavaScript bundle dropped from **982kB** to a featherweight **485kB**, cutting initial page loading latency in half.
-
-#### 3. Tailwind v4 Shifter Animation
-*   **The Issue:** Custom sliding marquee keyframes were missing, causing scrolling testimonial grids to break or render statically.
-*   **The Fix:** Successfully defined custom `--animate-marquee` and `marquee-vertical` definitions inside the `@theme` block in [index.css](file:///Users/mohitmudgil/Desktop/baio1/frontend/src/styles/index.css), resulting in hardware-accelerated, buttery smooth scrolling.
-
-#### 4. Interactive Text Cycles
-*   **The Issue:** Static text taglines lacked modern visual appeal.
-*   **The Fix:** Added the [AnimatedTextCycle.jsx](file:///Users/mohitmudgil/Desktop/baio1/frontend/src/components/ui/AnimatedTextCycle.jsx) spring-loaded banner and synchronized `data-content` overlays to make the footers extremely interactive.
+### Results & Reporting
+- Administrators upload result datasets.
+- Students and Schools can query diagnostic readiness reports and performance metrics via secure API endpoints.
 
 ---
 
-##  6. Forward Engineering Roadmap (Next Week's Action Plan)
+## Code Quality & Standards
 
-The next developmental iteration focuses on security hardening, load balancing, caching integration, and mock test administration.
-
-```mermaid
-gantt
-    title BAIO Roadmap - Next Week's Milestones
-    dateFormat  YYYY-MM-DD
-    section Week 2 Iteration
-    Admit Card PDF Generation Engine            :active, des1, 2026-06-02, 2d
-    Redis Read Cache Integration                 :after des1, 2d
-    KNN Spatial Spatial Routing Algorithm        : 2d
-    System Stress Testing (10k user simulation)  : 1d
-```
-
-### Detailed Milestones for Coming Week
-
-####  1. Admit Card PDF Engine (2 Days)
-*   Integrate a Node-based backend PDF canvas generator (`pdfkit` or `puppeteer`) to dynamically output high-fidelity printable Admit Cards.
-*   Embed a secure QR code encoding signed JWT coordinates (Student ID + Allocation Center ID) for physical room check-ins.
-
-####  2. Redis Session and Capacity Caching (2 Days)
-*   Integrate a Redis cache layer for the most expensive endpoints (such as `/api/v1/announcements` and `/api/v1/centers/capacity`).
-*   Establish write-aside invalidation schemes to ensure room seats are always updated as soon as bookings occur.
-
-####  3. KNN Geolocation Proctor Allocation Algorithm (2 Days)
-*   Implement a K-Nearest Neighbors spatial algorithm in Node.js to match candidate coordinates against registered physical proctoring centers in real-time.
-*   Automatically select the nearest center within maximum limits, gracefully cascading to the next closest secondary hub if filled.
-
-####  4. Load & Stress Simulation (1 Day)
-*   Run intensive stress-testing script scripts simulating 10,000 concurrent API transactions using `Artillery.io`.
-*   Benchmark connection pools to optimize MongoDB sharding and HAProxy request-queue lengths.
+This project adheres to professional development standards:
+- **Clean Code**: Minimal, descriptive commentary without informal language.
+- **Modular Design**: Separation of concerns across controllers, services, and routes.
+- **Validation First**: Strict input validation using Zod to prevent malformed data.
+- **Error Handling**: Centralized error catching middleware in the backend.
 
 ---
-*Developed with ❤️ by the BAIO Intern (Mohit)*
+*Maintained by the BAIO Development Team.*
