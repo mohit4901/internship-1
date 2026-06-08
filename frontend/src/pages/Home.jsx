@@ -339,10 +339,6 @@ export default function HomePage() {
 
       <ScrollVelocityMarquee />
 
-      <ScrollVelocityMarquee />
-
-      <ScrollVelocityMarquee />
-
       {/* ─── STATS BAR ────────────────────────────────────────────── */}
       <section className="px-6 pb-20">
         <div className="max-w-6xl mx-auto bg-[#001F5E] text-white rounded-3xl p-8 md:p-10 shadow-lg relative overflow-hidden transform -rotate-1">
