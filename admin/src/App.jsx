@@ -794,7 +794,8 @@ function SchoolsPage() {
   });
 
   return (
-    <div className="admin-card p-6">
+    <>
+      <div className="admin-card p-6">
       <TableToolbar query={query} onQuery={setQuery} placeholder="Search school, city…" onExport={handleExportSchools} />
       <AdminTable loading={loading} headers={['School Name', 'Board', 'City', 'State', 'Students', 'Verified', 'Email', 'Actions']}>
         {filtered.map(s => (
@@ -852,6 +853,7 @@ function SchoolsPage() {
           </tr>
         ))}
       </AdminTable>
+      </div>
 
       {/* School Full Details Modal */}
       {selectedSchoolForDetails && (
@@ -1401,7 +1403,7 @@ function SchoolsPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
