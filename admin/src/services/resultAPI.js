@@ -9,4 +9,6 @@ export const resultAPI = {
   create: (data)     => api.post('/results', data),
   update: (id, data) => api.patch(`/results/${id}`, data),
   delete: (id)       => api.delete(`/results/${id}`),
+  publishSchoolResults: (schoolId, isPublished) => api.patch(`/results/publish/school/${schoolId}`, { isPublished }),
+  publishAllResults: (isPublished) => api.patch('/results/publish/all', { isPublished }),
 };

@@ -222,7 +222,7 @@ const MarqueeItem = () => (
   <div className="flex items-center space-x-12 px-6">
     <span>BHARAT AI OLYMPIAD</span> <span className="text-[#FF8C00]">✦</span>
     <span>CBSE CTAI ALIGNED</span> <span className="text-[#0B7F3B]">✦</span>
-    <span>CLASSES 3 TO 8</span> <span className="text-[#FF8C00]">✦</span>
+    <span>GRADES 3 TO 8</span> <span className="text-[#FF8C00]">✦</span>
     <span>ZERO SYLLABUS BURDEN</span> <span className="text-[#0B7F3B]">✦</span>
     <span>DIAGNOSTIC READINESS REPORT</span> <span className="text-[#FF8C00]">✦</span>
   </div>
@@ -300,12 +300,12 @@ export default function Footer() {
   };
 
   const ctaiAlignment = [
-    { grade: 'Class 3', pct: 97 },
-    { grade: 'Class 4', pct: 96 },
-    { grade: 'Class 5', pct: 93 },
-    { grade: 'Class 6', pct: 94 },
-    { grade: 'Class 7', pct: 92 },
-    { grade: 'Class 8', pct: 95 },
+    { grade: 'Grade 3', pct: 97 },
+    { grade: 'Grade 4', pct: 96 },
+    { grade: 'Grade 5', pct: 93 },
+    { grade: 'Grade 6', pct: 94 },
+    { grade: 'Grade 7', pct: 92 },
+    { grade: 'Grade 8', pct: 95 },
   ];
 
   return (
@@ -361,16 +361,10 @@ export default function Footer() {
               
               {/* Col 1: CTAs & Magnetic Pills */}
               <div className="md:col-span-4 space-y-5 flex flex-col items-center md:items-start">
+                <div className="bg-white p-3.5 rounded-2xl border-2 border-white/10 shadow-inner flex items-center justify-center w-max mb-3 hover:scale-105 transition-transform duration-300">
+                  <BAIOLogo className="h-12 w-auto" />
+                </div>
                 <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full">
-                  <MagneticButton 
-                    as={Link} 
-                    to="/register" 
-                    className="footer-glass-pill px-6 py-4 rounded-xl text-white font-extrabold text-sm flex items-center justify-center gap-2 group cursor-pointer text-center"
-                  >
-                    Register Your School
-                    <ExternalLink className="w-4 h-4 text-[#FF8C00] group-hover:scale-110 transition-transform" />
-                  </MagneticButton>
-                  
                   <MagneticButton 
                     as={Link} 
                     to="/contact" 
@@ -429,6 +423,11 @@ export default function Footer() {
                 <div className="space-y-2">
                   <h4 className="text-[9px] font-black uppercase tracking-[0.18em] text-[#FF8C00]">School Portal</h4>
                   <ul className="space-y-2">
+                    <li>
+                      <Link to="/register" className="text-[11px] text-white/60 hover:text-white transition-colors font-medium">
+                        Register School
+                      </Link>
+                    </li>
                     <li>
                       <Link to="/school/login" className="text-[11px] text-white/60 hover:text-white transition-colors font-medium">
                         School Login

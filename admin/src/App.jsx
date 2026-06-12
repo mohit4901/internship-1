@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage';
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import AdminNavbar from './components/AdminNavbar';
+import * as XLSX from 'xlsx';
 import {
   dashboardAPI, olympiadAPI, registrationAPI,
   studentAPI, schoolAPI, announcementAPI, resultAPI, contactAPI,
@@ -14,7 +15,8 @@ import {
   CheckCircle, Clock, ShieldAlert, XCircle, Eye,
   Calendar, Sparkles, ChevronLeft, ChevronRight, RefreshCw,
   Settings, Upload, Globe, HelpCircle, Phone, Home, Image,
-  FileCheck, Loader2, Check, AlertCircle, Trash2, ClipboardList
+  FileCheck, Loader2, Check, AlertCircle, Trash2, ClipboardList,
+  FileSpreadsheet, CheckSquare, Square, BarChart3
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────
@@ -450,7 +452,7 @@ function RegistrationsPage() {
     (async () => {
       try {
         const res = await registrationAPI.list({ limit: 50 });
-        const list = res?.data?.data || res?.data || [];
+        const list = res?.data?.data?.registrations || res?.data?.registrations || res?.data?.data || [];
         setData(Array.isArray(list) && list.length ? list : MOCK_REGS);
       } catch { setData(MOCK_REGS); }
       finally { setLoading(false); }
@@ -459,14 +461,32 @@ function RegistrationsPage() {
 
   const filtered = data.filter(r => {
     const q = query.toLowerCase();
-    return (r.studentId?.name || '').toLowerCase().includes(q) ||
+    const studentName = r.studentId?.name || r.studentId?.fullName || r.studentName || '';
+    return studentName.toLowerCase().includes(q) ||
            (r.schoolId?.name  || '').toLowerCase().includes(q) ||
            (r.registrationNumber || '').toLowerCase().includes(q);
   });
 
+  const handleExportRegistrations = () => {
+    const formatted = filtered.map(r => ({
+      "Registration Number": r.registrationNumber || "—",
+      "Student Name": r.studentId?.fullName || r.studentId?.name || r.studentName || "—",
+      "School Name": r.schoolId?.name || "—",
+      "Division": r.division || "—",
+      "Date Registered": r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "—",
+      "Payment Status": r.paymentStatus || "—",
+      "Registration Status": r.registrationStatus || "—",
+      "Roll Number": r.rollNumber || "—"
+    }));
+    const ws = XLSX.utils.json_to_sheet(formatted);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Registrations");
+    XLSX.writeFile(wb, "BAIO_Registrations_List.xlsx");
+  };
+
   return (
     <div className="admin-card p-6">
-      <TableToolbar query={query} onQuery={setQuery} placeholder="Search name, school, reg no…" onExport={() => {}} />
+      <TableToolbar query={query} onQuery={setQuery} placeholder="Search name, school, reg no…" onExport={handleExportRegistrations} />
       <AdminTable loading={loading} headers={['Reg No.', 'Student', 'School', 'Division', 'Date', 'Payment', 'Status', 'Roll No.']}>
         {filtered.map(r => (
           <tr key={r._id}>
@@ -574,11 +594,23 @@ function SchoolsPage() {
   const [participantsQuery, setParticipantsQuery] = useState('');
   const [participantsClassFilter, setParticipantsClassFilter] = useState('');
 
+  // Performance modal state
+  const [selectedSchoolForPerformance, setSelectedSchoolForPerformance] = useState(null);
+  const [performanceData, setPerformanceData] = useState(null);
+  const [loadingPerformance, setLoadingPerformance] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  
+  // Performance filters
+  const [perfSearch, setPerfSearch] = useState('');
+  const [perfClass, setPerfClass] = useState('');
+  const [perfSection, setPerfSection] = useState('');
+  const [perfStatus, setPerfStatus] = useState('');
+
   const loadSchools = async () => {
     setLoading(true);
     try {
       const res = await schoolAPI.list({ limit: 100 });
-      const list = res?.data?.data || res?.data || [];
+      const list = res?.data?.data?.schools || res?.data?.schools || res?.data?.data || [];
       setData(Array.isArray(list) && list.length ? list : MOCK_SCHOOLS);
     } catch { setData(MOCK_SCHOOLS); }
     finally { setLoading(false); }
@@ -605,6 +637,28 @@ function SchoolsPage() {
     })();
   }, [selectedSchoolForParticipants]);
 
+  // Fetch school performance reports
+  useEffect(() => {
+    if (!selectedSchoolForPerformance) {
+      setPerformanceData(null);
+      setSelectedStudents([]);
+      return;
+    }
+    (async () => {
+      setLoadingPerformance(true);
+      try {
+        const res = await schoolAPI.getResultsAnalytics(selectedSchoolForPerformance._id);
+        setPerformanceData(res?.data || res?.data?.data || null);
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load performance analytics for this school.');
+        setSelectedSchoolForPerformance(null);
+      } finally {
+        setLoadingPerformance(false);
+      }
+    })();
+  }, [selectedSchoolForPerformance]);
+
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
     if (!verifySchoolItem) return;
@@ -622,6 +676,116 @@ function SchoolsPage() {
     }
   };
 
+  const handleExportSchools = () => {
+    const formatted = data.map(s => ({
+      "School Name": s.name,
+      "Board": s.board,
+      "City": s.address?.city || "",
+      "State": s.address?.state || "",
+      "Registered Students": s.registeredStudentsCount || 0,
+      "Verification Status": s.isVerified ? "Verified" : "Pending",
+      "Email": s.contactEmail,
+      "Phone": s.contactPhone,
+      "Principal": s.principalName || "",
+      "Coordinator Name": s.coordinator?.name || "",
+      "Coordinator Email": s.coordinator?.email || "",
+      "Coordinator Phone": s.coordinator?.phone || ""
+    }));
+    const ws = XLSX.utils.json_to_sheet(formatted);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Schools");
+    XLSX.writeFile(wb, "BAIO_Registered_Schools.xlsx");
+  };
+
+  const exportStudentResultsExcel = (schoolName, studentsToExport) => {
+    const formatted = studentsToExport.map(s => ({
+      "Roll Number": s.result?.rollNumber || "N/A",
+      "Student Name": s.name,
+      "Class/Grade": s.class,
+      "Section": s.section || "—",
+      "Gender": s.gender || "—",
+      "Logical Reasoning": s.result?.scores?.logicalReasoning ?? "N/A",
+      "Algorithmic Thinking": s.result?.scores?.algorithmicThinking ?? "N/A",
+      "AI Core": s.result?.scores?.aiCore ?? "N/A",
+      "Total Marks Obtained": s.result?.scores?.totalMarksObtained ?? "N/A",
+      "Maximum Marks": s.result?.totalMaxMarks ?? "N/A",
+      "Percentage": s.result?.percentage !== undefined ? `${s.result.percentage}%` : "N/A",
+      "National Percentile": s.result?.percentile !== undefined ? `${s.result.percentile}%` : "N/A",
+      "National Rank": s.result?.rankings?.national ?? "N/A",
+      "State Rank": s.result?.rankings?.state ?? "N/A",
+      "School Rank": s.result?.rankings?.school ?? "N/A",
+      "Status": s.result?.qualificationStatus || "Registered"
+    }));
+    const ws = XLSX.utils.json_to_sheet(formatted);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Student Results");
+    XLSX.writeFile(wb, `${schoolName || 'School'}_Student_Results.xlsx`);
+  };
+
+  const exportClassStatsExcel = (schoolName, statsObj) => {
+    const cData = Object.keys(statsObj).map(cls => ({
+      "Class": `Class ${cls}`,
+      "Total Registered": statsObj[cls].total,
+      "Appeared": statsObj[cls].appeared,
+      "Average Marks": statsObj[cls].average,
+      "Highest Mark": statsObj[cls].highest,
+      "Lowest Mark": statsObj[cls].lowest
+    }));
+    const ws = XLSX.utils.json_to_sheet(cData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Class Stats");
+    XLSX.writeFile(wb, `${schoolName || 'School'}_Class_Stats.xlsx`);
+  };
+
+  const exportSectionStatsExcel = (schoolName, sectionsList) => {
+    const sData = sectionsList.map(sec => ({
+      "Class": `Class ${sec.class}`,
+      "Section": sec.section,
+      "Appeared": sec.appeared,
+      "Average Marks": sec.average,
+      "Highest Mark": sec.highest,
+      "Lowest Mark": sec.lowest
+    }));
+    const ws = XLSX.utils.json_to_sheet(sData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Section Stats");
+    XLSX.writeFile(wb, `${schoolName || 'School'}_Section_Stats.xlsx`);
+  };
+
+  const handleSelectStudent = (id) => {
+    if (selectedStudents.includes(id)) {
+      setSelectedStudents(selectedStudents.filter(sid => sid !== id));
+    } else {
+      setSelectedStudents([...selectedStudents, id]);
+    }
+  };
+
+  const handleSelectAllFiltered = (filteredList) => {
+    const allFilteredIds = filteredList.map(s => s._id);
+    const hasAllSelected = allFilteredIds.every(id => selectedStudents.includes(id));
+    if (hasAllSelected) {
+      setSelectedStudents(selectedStudents.filter(id => !allFilteredIds.includes(id)));
+    } else {
+      const merged = Array.from(new Set([...selectedStudents, ...allFilteredIds]));
+      setSelectedStudents(merged);
+    }
+  };
+
+  // Filter student performance table
+  const getFilteredPerformanceStudents = () => {
+    if (!performanceData?.students) return [];
+    return performanceData.students.filter(s => {
+      const matchesSearch = s.name.toLowerCase().includes(perfSearch.toLowerCase()) || 
+                            (s.result?.rollNumber || '').toLowerCase().includes(perfSearch.toLowerCase());
+      const matchesClass = !perfClass || s.class === perfClass;
+      const matchesSection = !perfSection || s.section?.toUpperCase() === perfSection.toUpperCase();
+      const matchesStatus = !perfStatus || (s.result?.qualificationStatus || 'Registered') === perfStatus;
+      return matchesSearch && matchesClass && matchesSection && matchesStatus;
+    });
+  };
+
+  const filteredPerformanceStudents = getFilteredPerformanceStudents();
+
   const filtered = data.filter(s => {
     const q = query.toLowerCase();
     return (s.name || '').toLowerCase().includes(q) ||
@@ -631,7 +795,7 @@ function SchoolsPage() {
 
   return (
     <div className="admin-card p-6">
-      <TableToolbar query={query} onQuery={setQuery} placeholder="Search school, city…" onExport={() => {}} />
+      <TableToolbar query={query} onQuery={setQuery} placeholder="Search school, city…" onExport={handleExportSchools} />
       <AdminTable loading={loading} headers={['School Name', 'Board', 'City', 'State', 'Students', 'Verified', 'Email', 'Actions']}>
         {filtered.map(s => (
           <tr key={s._id}>
@@ -660,21 +824,30 @@ function SchoolsPage() {
             </td>
             <td className="py-3.5 pr-4"><StatusBadge status={s.isVerified ? 'Confirmed' : 'Pending'} /></td>
             <td className="py-3.5 text-slate-500 text-[10px]">{s.contactEmail}</td>
-            <td className="py-3.5">
-              <button
-                onClick={() => {
-                  setVerifySchoolItem(s);
-                  setVerifyStatus(!s.isVerified);
-                  setRemarks('');
-                }}
-                className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
-                  s.isVerified
-                    ? 'text-rose-450 hover:text-rose-350 bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20'
-                    : 'text-brand-orange hover:text-brand-orange/90 bg-brand-orange/10 hover:bg-brand-orange/20 border-brand-orange/20'
-                }`}
-              >
-                {s.isVerified ? 'Reject/Revoke' : 'Approve/Verify'}
-              </button>
+            <td className="py-3.5 text-right">
+              <div className="flex gap-1.5 justify-end">
+                <button
+                  onClick={() => {
+                    setVerifySchoolItem(s);
+                    setVerifyStatus(!s.isVerified);
+                    setRemarks('');
+                  }}
+                  className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg border transition-all cursor-pointer ${
+                    s.isVerified
+                      ? 'text-rose-600 hover:text-rose-700 bg-rose-50 border-rose-200'
+                      : 'text-brand-orange hover:text-brand-orange/90 bg-orange-50 border-brand-orange/20'
+                  }`}
+                >
+                  {s.isVerified ? 'Revoke' : 'Verify'}
+                </button>
+                <button
+                  onClick={() => setSelectedSchoolForPerformance(s)}
+                  className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[#001F5E] transition-all cursor-pointer"
+                >
+                  <BarChart3 className="w-3 h-3 text-slate-500" />
+                  <span>Performance</span>
+                </button>
+              </div>
             </td>
           </tr>
         ))}
@@ -948,6 +1121,286 @@ function SchoolsPage() {
           </div>
         </div>
       )}
+
+      {/* School Performance Modal */}
+      {selectedSchoolForPerformance && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white border-4 border-brand-navy rounded-3xl p-6 max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl relative">
+            <button
+              onClick={() => setSelectedSchoolForPerformance(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-650 font-bold text-lg cursor-pointer"
+            >
+              ✕
+            </button>
+            
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart3 className="w-5 h-5 text-brand-orange" />
+              <h3 className="text-base font-black text-brand-navy">School Performance Reports</h3>
+            </div>
+            <p className="text-xs text-slate-500 mb-4">
+              Detailed analytics, class metrics, and candidate scorecard listings for <strong className="text-slate-800">{selectedSchoolForPerformance.name}</strong>.
+            </p>
+
+            {loadingPerformance ? (
+              <div className="flex-1 flex flex-col items-center justify-center py-20 space-y-3">
+                <div className="w-10 h-10 border-4 border-[#001F5E] border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-slate-500 font-bold">Loading Performance Metrics...</p>
+              </div>
+            ) : !performanceData || !performanceData.overview || performanceData.overview.totalRegistered === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center py-12 text-center space-y-4">
+                <div className="w-12 h-12 bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-slate-400" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-slate-700">No Performance Data Available</p>
+                  <p className="text-xs text-slate-400 max-w-md">
+                    Either no students have been submitted, or results have not been calculated/published yet.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto min-h-0 space-y-6 pr-1.5">
+                {/* 1. Overview cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Registered Candidates', value: performanceData.overview.totalRegistered },
+                    { label: 'Appeared Candidates', value: performanceData.overview.totalAppeared },
+                    { label: 'School Average Score', value: `${performanceData.overview.averageScore} / 100` },
+                    { label: 'Qualifiers Count', value: `${performanceData.overview.qualifiedCount} (${performanceData.overview.qualificationRate}%)` },
+                  ].map((card, i) => (
+                    <div key={i} className="bg-slate-50 border-2 border-brand-navy/10 rounded-2xl p-4">
+                      <p className="text-[9px] text-slate-400 font-black uppercase tracking-wider">{card.label}</p>
+                      <p className="font-heading font-black text-[#001F5E] text-xl mt-1">{card.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 2. Grade and Section stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Grade-wise table */}
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                      <span className="text-xs font-bold text-slate-700">Grade Level Reports</span>
+                      <button
+                        onClick={() => exportClassStatsExcel(selectedSchoolForPerformance.name, performanceData.classStats)}
+                        className="text-[10px] text-brand-green font-extrabold flex items-center gap-1 border border-brand-green/20 px-2 py-1 rounded bg-white hover:bg-emerald-50 cursor-pointer"
+                      >
+                        <Download className="w-3 h-3" /> Excel
+                      </button>
+                    </div>
+                    <table className="w-full text-xs">
+                      <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Class</th>
+                          <th className="px-3 py-2 text-left">Appeared</th>
+                          <th className="px-3 py-2 text-left">Average</th>
+                          <th className="px-3 py-2 text-left">Highest</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.keys(performanceData.classStats).map(cls => (
+                          <tr key={cls} className="border-b border-slate-100 last:border-none font-semibold text-slate-700 font-bold">
+                            <td className="px-3 py-2">Class {cls}</td>
+                            <td className="px-3 py-2">{performanceData.classStats[cls].appeared}</td>
+                            <td className="px-3 py-2 text-brand-orange">{performanceData.classStats[cls].average}</td>
+                            <td className="px-3 py-2 text-brand-green">{performanceData.classStats[cls].highest}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Section-wise table */}
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                      <span className="text-xs font-bold text-slate-700">Section Level Reports</span>
+                      <button
+                        onClick={() => exportSectionStatsExcel(selectedSchoolForPerformance.name, performanceData.sectionStats)}
+                        className="text-[10px] text-brand-green font-extrabold flex items-center gap-1 border border-brand-green/20 px-2 py-1 rounded bg-white hover:bg-emerald-50 cursor-pointer"
+                      >
+                        <Download className="w-3 h-3" /> Excel
+                      </button>
+                    </div>
+                    <div className="max-h-[200px] overflow-y-auto">
+                      <table className="w-full text-xs">
+                        <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 sticky top-0">
+                          <tr>
+                            <th className="px-3 py-2 text-left">Class & Sec</th>
+                            <th className="px-3 py-2 text-left">Appeared</th>
+                            <th className="px-3 py-2 text-left">Average</th>
+                            <th className="px-3 py-2 text-left">Highest</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {performanceData.sectionStats.length === 0 ? (
+                            <tr>
+                              <td colSpan={4} className="text-center py-4 text-slate-400">No section-wise data.</td>
+                            </tr>
+                          ) : (
+                            performanceData.sectionStats.map(sec => (
+                              <tr key={sec.key} className="border-b border-slate-100 last:border-none font-semibold text-slate-700 font-bold">
+                                <td className="px-3 py-2">Class {sec.class} - {sec.section}</td>
+                                <td className="px-3 py-2">{sec.appeared}</td>
+                                <td className="px-3 py-2 text-brand-orange">{sec.average}</td>
+                                <td className="px-3 py-2 text-brand-green">{sec.highest}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Candidate scorecard search and listing */}
+                <div className="border border-slate-250 rounded-2xl overflow-hidden bg-white">
+                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span className="text-xs font-bold text-brand-navy">Individual Candidate Scorecards</span>
+                    
+                    {/* Filters */}
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        type="text"
+                        placeholder="Search roll/name..."
+                        value={perfSearch}
+                        onChange={e => setPerfSearch(e.target.value)}
+                        className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] w-[140px] focus:outline-none focus:border-brand-orange font-semibold text-slate-700"
+                      />
+                      <select
+                        value={perfClass}
+                        onChange={e => setPerfClass(e.target.value)}
+                        className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] focus:outline-none focus:border-brand-orange text-slate-750 font-semibold"
+                      >
+                        <option value="">All Classes</option>
+                        {['6', '7', '8', '9', '10', '11', '12'].map(c => (
+                          <option key={c} value={c}>Class {c}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={perfStatus}
+                        onChange={e => setPerfStatus(e.target.value)}
+                        className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] focus:outline-none focus:border-brand-orange text-slate-750 font-semibold"
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="Registered">Registered</option>
+                        <option value="Qualified">Qualified</option>
+                        <option value="Participated">Participated</option>
+                        <option value="MeritAwardee">Merit Awardee</option>
+                        <option value="NationalRanker">National Ranker</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Bulk Actions Bar */}
+                  <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-2 items-center text-[10px]">
+                    <span className="font-extrabold text-slate-500 uppercase">{selectedStudents.length} Selected</span>
+                    <button
+                      onClick={() => {
+                        const list = performanceData.students.filter(s => selectedStudents.includes(s._id));
+                        exportStudentResultsExcel(selectedSchoolForPerformance.name, list);
+                      }}
+                      disabled={selectedStudents.length === 0}
+                      className="px-2 py-1 bg-[#001F5E] text-white rounded font-bold disabled:opacity-40 cursor-pointer flex items-center gap-1 shadow-sm"
+                    >
+                      <FileSpreadsheet className="w-3 h-3" /> Export Selected Chunk (Excel)
+                    </button>
+                    <button
+                      onClick={() => {
+                        const filteredList = filteredPerformanceStudents;
+                        exportStudentResultsExcel(selectedSchoolForPerformance.name, filteredList);
+                      }}
+                      className="px-2 py-1 border border-brand-green text-brand-green hover:bg-emerald-50 rounded font-bold cursor-pointer flex items-center gap-1 bg-white"
+                    >
+                      <Download className="w-3 h-3" /> Export All Filtered (Excel)
+                    </button>
+                  </div>
+
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                      <tr>
+                        <th className="px-3 py-2 text-left w-8">
+                          <button
+                            onClick={() => handleSelectAllFiltered(filteredPerformanceStudents)}
+                            className="text-slate-400 hover:text-[#001F5E] cursor-pointer"
+                          >
+                            {filteredPerformanceStudents.length > 0 && filteredPerformanceStudents.every(s => selectedStudents.includes(s._id)) ? (
+                              <CheckSquare className="w-3.5 h-3.5 text-brand-navy" />
+                            ) : (
+                              <Square className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Roll Number</th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Name</th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Class & Sec</th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Scores (L/A/AI)</th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Total</th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Percentile</th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Rank</th>
+                        <th className="px-3 py-2 text-left text-brand-navy font-bold">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPerformanceStudents.length === 0 ? (
+                        <tr>
+                          <td colSpan={9} className="text-center py-6 text-slate-400 font-semibold">No candidates match the criteria.</td>
+                        </tr>
+                      ) : (
+                        filteredPerformanceStudents.map(s => {
+                          const isChecked = selectedStudents.includes(s._id);
+                          return (
+                            <tr key={s._id} className={`border-b border-slate-100 last:border-none font-semibold text-slate-750 hover:bg-slate-50/50 transition-colors ${isChecked ? 'bg-indigo-50/20' : ''}`}>
+                              <td className="px-3 py-2">
+                                <button onClick={() => handleSelectStudent(s._id)} className="text-slate-400 hover:text-brand-navy cursor-pointer">
+                                  {isChecked ? <CheckSquare className="w-3.5 h-3.5 text-brand-navy" /> : <Square className="w-3.5 h-3.5" />}
+                                </button>
+                              </td>
+                              <td className="px-3 py-2 font-bold text-brand-navy">{s.result?.rollNumber || '—'}</td>
+                              <td className="px-3 py-2">{s.name}</td>
+                              <td className="px-3 py-2">Class {s.class} - {s.section || '—'}</td>
+                              <td className="px-3 py-2 font-mono text-[10px]">
+                                {s.result ? `${s.result.scores?.logicalReasoning ?? 0}/${s.result.scores?.algorithmicThinking ?? 0}/${s.result.scores?.aiCore ?? 0}` : '—'}
+                              </td>
+                              <td className="px-3 py-2 text-brand-orange font-bold">
+                                {s.result ? `${s.result.scores?.totalMarksObtained ?? 0}/${s.result.totalMaxMarks ?? 100}` : '—'}
+                              </td>
+                              <td className="px-3 py-2 font-mono">{s.result ? `${s.result.percentile}%` : '—'}</td>
+                              <td className="px-3 py-2 text-slate-500">{s.result?.rankings?.national ?? '—'}</td>
+                              <td className="px-3 py-2">
+                                {s.result ? (
+                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider ${
+                                    s.result.qualificationStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                    s.result.qualificationStatus === 'MeritAwardee' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                                    s.result.qualificationStatus === 'NationalRanker' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                                    'bg-slate-50 text-slate-500 border border-slate-200'
+                                  }`}>
+                                    {s.result.qualificationStatus}
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider bg-slate-50 text-slate-400 border border-slate-150">Registered</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            <div className="flex justify-end pt-4 mt-3 border-t border-slate-150">
+              <button
+                onClick={() => setSelectedSchoolForPerformance(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Close Window
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -988,6 +1441,22 @@ function ParticipantsPage() {
     load();
   }, [load]);
 
+  const handleExport = () => {
+    const formatted = data.map(p => ({
+      "Student Name": p.name,
+      "Class/Grade": p.class,
+      "Section": p.section || "—",
+      "Roll Number": p.rollNo || "—",
+      "Gender": p.gender || "—",
+      "Division": p.division || "—",
+      "School Name": p.schoolId?.name || "—"
+    }));
+    const ws = XLSX.utils.json_to_sheet(formatted);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Participants");
+    XLSX.writeFile(wb, "BAIO_Global_Participants_List.xlsx");
+  };
+
   return (
     <div className="admin-card p-6 animate-fade-up">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
@@ -1027,6 +1496,15 @@ function ParticipantsPage() {
             title="Refresh"
           >
             <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={!data || data.length === 0}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-emerald-50 text-brand-green border border-brand-green/20 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+            title="Export current page list to Excel"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Excel</span>
           </button>
         </div>
       </div>
@@ -1261,7 +1739,12 @@ function ResultsPage() {
   const [deleting, setDeleting] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [olympiads, setOlympiads]       = useState([]);
+  const [schools, setSchools]           = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
+
+  const [selectedSchoolForPublish, setSelectedSchoolForPublish] = useState('');
+  const [publishingSchool, setPublishingSchool] = useState(false);
+  const [publishingGlobal, setPublishingGlobal] = useState(false);
 
   const [form, setForm] = useState({
     participantId: '',
@@ -1294,12 +1777,14 @@ function ResultsPage() {
   const loadOptions = async () => {
     setLoadingOptions(true);
     try {
-      const [pRes, oRes] = await Promise.all([
+      const [pRes, oRes, sRes] = await Promise.all([
         participantAPI.list({ limit: 200 }),
-        olympiadAPI.list()
+        olympiadAPI.list(),
+        schoolAPI.list({ limit: 100 })
       ]);
       setParticipants(pRes?.data?.data?.participants || pRes?.data?.participants || []);
       setOlympiads(oRes?.data?.data?.olympiads || oRes?.data?.data || oRes?.data || []);
+      setSchools(sRes?.data?.data?.schools || sRes?.data?.schools || sRes?.data?.data || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -1311,6 +1796,59 @@ function ResultsPage() {
     load();
     loadOptions();
   }, []);
+
+  const handlePublishSchool = async (isPublished) => {
+    if (!selectedSchoolForPublish) {
+      alert('Please select a school first.');
+      return;
+    }
+    const schoolName = schools.find(s => s._id === selectedSchoolForPublish)?.name || 'this school';
+    if (!window.confirm(`Are you sure you want to ${isPublished ? 'PUBLISH' : 'UNPUBLISH'} results for ${schoolName}?`)) return;
+    setPublishingSchool(true);
+    try {
+      await resultAPI.publishSchoolResults(selectedSchoolForPublish, isPublished);
+      alert(`Successfully ${isPublished ? 'published' : 'unpublished'} results for ${schoolName}.`);
+      load();
+    } catch (err) {
+      alert(err?.message || 'Publish operation failed.');
+    } finally {
+      setPublishingSchool(false);
+    }
+  };
+
+  const handlePublishGlobal = async (isPublished) => {
+    if (!window.confirm(`Are you sure you want to ${isPublished ? 'PUBLISH' : 'UNPUBLISH'} results for ALL schools globally?`)) return;
+    setPublishingGlobal(true);
+    try {
+      await resultAPI.publishAllResults(isPublished);
+      alert(`Successfully ${isPublished ? 'published' : 'unpublished'} all results globally.`);
+      load();
+    } catch (err) {
+      alert(err?.message || 'Global publish operation failed.');
+    } finally {
+      setPublishingGlobal(false);
+    }
+  };
+
+  const handleExportResults = () => {
+    const formatted = filtered.map(r => ({
+      "Roll Number": r.rollNumber || "—",
+      "Student Name": r.participantId?.name || r.studentName || "—",
+      "Olympiad": r.olympiadId?.title || r.olympiadName || "—",
+      "Logical Reasoning": r.scores?.logicalReasoning ?? 0,
+      "Algorithmic Thinking": r.scores?.algorithmicThinking ?? 0,
+      "AI Core": r.scores?.aiCore ?? 0,
+      "Total Marks": r.scores?.totalMarksObtained ?? 0,
+      "Percentage": r.percentage !== undefined ? `${r.percentage}%` : "—",
+      "Percentile": r.percentile !== undefined ? `${r.percentile}%` : "—",
+      "AIR Rank": r.rankings?.national !== undefined ? `AIR ${r.rankings.national}` : "—",
+      "Qualification Status": r.qualificationStatus || "—"
+    }));
+    const ws = XLSX.utils.json_to_sheet(formatted);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Results");
+    XLSX.writeFile(wb, "BAIO_Olympiad_Results.xlsx");
+  };
 
   const handleParticipantChange = (pId) => {
     const p = participants.find(x => x._id === pId);
@@ -1412,8 +1950,78 @@ function ResultsPage() {
 
   return (
     <div className="space-y-5">
+      {/* Result Publishing Control Panel */}
+      <div className="bg-white border-4 border-brand-navy rounded-3xl p-5 edu-shadow space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+          <Megaphone className="w-5 h-5 text-brand-navy" />
+          <div>
+            <h3 className="font-heading font-extrabold text-brand-navy text-sm">Bulk Results Publishing Center</h3>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5">Control the visibility of scorecards in school and student dashboards.</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+          {/* School-wise Publishing */}
+          <div className="md:col-span-7 space-y-2.5">
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Option A: School-Wise Release</span>
+            <div className="flex flex-col sm:flex-row gap-2.5">
+              <select
+                value={selectedSchoolForPublish}
+                onChange={e => setSelectedSchoolForPublish(e.target.value)}
+                className="flex-1 bg-white border-2 border-[#001F5E] rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-navy"
+              >
+                <option value="">-- Choose School to Publish --</option>
+                {schools.map(s => (
+                  <option key={s._id} value={s._id}>{s.name} ({s.address?.city || 'City'})</option>
+                ))}
+              </select>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handlePublishSchool(true)}
+                  disabled={publishingSchool || !selectedSchoolForPublish}
+                  className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-250 text-emerald-700 rounded-xl text-xs font-extrabold transition-all cursor-pointer disabled:opacity-50"
+                >
+                  Publish School
+                </button>
+                <button
+                  onClick={() => handlePublishSchool(false)}
+                  disabled={publishingSchool || !selectedSchoolForPublish}
+                  className="px-3 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-250 text-rose-700 rounded-xl text-xs font-extrabold transition-all cursor-pointer disabled:opacity-50"
+                >
+                  Unpublish School
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="hidden md:block md:col-span-1 text-center font-bold text-slate-350 text-xs">OR</div>
+
+          {/* Global Release */}
+          <div className="md:col-span-4 space-y-2.5">
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">Option B: Global Release (All Schools)</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handlePublishGlobal(true)}
+                disabled={publishingGlobal}
+                className="flex-1 px-3 py-2 bg-[#001F5E] text-white rounded-xl text-xs font-extrabold transition-all hover:bg-indigo-900 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1"
+              >
+                <CheckCircle className="w-3.5 h-3.5" /> Release All
+              </button>
+              <button
+                onClick={() => handlePublishGlobal(false)}
+                disabled={publishingGlobal}
+                className="flex-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-350 text-slate-600 rounded-xl text-xs font-extrabold transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1"
+              >
+                <XCircle className="w-3.5 h-3.5" /> Hide All
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
-        <TableToolbar query={query} onQuery={setQuery} placeholder="Search roll no, name…" onExport={() => {}} />
+        <TableToolbar query={query} onQuery={setQuery} placeholder="Search roll no, name…" onExport={handleExportResults} />
         <button 
           onClick={() => setShowForm(s => !s)}
           className="flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ml-3 cursor-pointer shrink-0"
@@ -1561,7 +2169,7 @@ function ContactsPage() {
     (async () => {
       try {
         const res = await contactAPI.list({ limit: 50 });
-        const list = res?.data?.data || res?.data || [];
+        const list = res?.data?.data?.submissions || res?.data?.submissions || res?.data?.data || [];
         setData(Array.isArray(list) && list.length ? list : MOCK_CONTACTS);
       } catch { setData(MOCK_CONTACTS); }
       finally { setLoading(false); }
@@ -1573,9 +2181,25 @@ function ContactsPage() {
     return (c.name || '').toLowerCase().includes(q) || (c.subject || '').toLowerCase().includes(q);
   });
 
+  const handleExportContacts = () => {
+    const formatted = filtered.map(c => ({
+      "Name": c.name,
+      "Email": c.email,
+      "Phone": c.phone || "—",
+      "Subject": c.subject,
+      "Message/Inquiry": c.message || "",
+      "Status": c.status || "Pending",
+      "Received At": c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ""
+    }));
+    const ws = XLSX.utils.json_to_sheet(formatted);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Contacts");
+    XLSX.writeFile(wb, "BAIO_Contact_Inquiries.xlsx");
+  };
+
   return (
     <div className="admin-card p-6">
-      <TableToolbar query={query} onQuery={setQuery} placeholder="Search name, subject…" />
+      <TableToolbar query={query} onQuery={setQuery} placeholder="Search name, subject…" onExport={handleExportContacts} />
       <AdminTable loading={loading} headers={['Name', 'Email', 'Subject', 'Status', 'Received']}>
         {filtered.map(c => (
           <tr key={c._id}>

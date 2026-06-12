@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
+import {
   Home, Info, Trophy, School, HelpCircle, Mail, LogOut, BookOpen
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -9,10 +9,10 @@ import logoImg from '../assets/logo.jpg';
 
 function BAIOLogo({ className = '' }) {
   return (
-    <img 
-      src={logoImg} 
-      alt="BAIO Logo" 
-      className={`${className} object-contain mix-blend-multiply`} 
+    <img
+      src={logoImg}
+      alt="BAIO Logo"
+      className={`${className} object-contain mix-blend-multiply`}
     />
   );
 }
@@ -28,10 +28,10 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { to: '/olympiads',   label: 'Olympiads',     icon: Trophy },
-    { to: '/olympiad',    label: 'Syllabus',      icon: BookOpen },
-    { to: '/schools',     label: 'For Schools',   icon: School },
-    { to: '/faqs',        label: 'FAQs',          icon: HelpCircle },
+    { to: '/olympiads', label: 'Olympiads', icon: Trophy },
+    { to: '/olympiad', label: 'Syllabus', icon: BookOpen },
+    { to: '/schools', label: 'For Schools', icon: School },
+    { to: '/faqs', label: 'FAQs', icon: HelpCircle },
   ];
 
   return (
@@ -39,10 +39,10 @@ export default function Navbar() {
       {/* ─── DESKTOP FLOATING BAR ────────────────────────────────────── */}
       <div className="hidden md:block fixed top-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-5xl px-6">
         <div className="flex items-center justify-between bg-white border border-slate-200/80 py-1.5 px-6 rounded-full shadow-lg pointer-events-auto">
-          
+
           {/* Logo Section */}
           <Link to="/" className="flex items-center no-underline shrink-0 group">
-            <BAIOLogo className="h-12 md:h-14 w-auto" />
+            <BAIOLogo className="h-16 md:h-20 w-auto hover:scale-105 transition-transform duration-300 " />
           </Link>
 
           {/* Desktop Links with Framer Motion Lamp glow */}
@@ -54,9 +54,8 @@ export default function Navbar() {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`relative cursor-pointer text-xs font-bold px-4 py-2 rounded-full transition-colors duration-200 ${
-                    isActive ? 'text-[#FF8C00]' : 'text-slate-600 hover:text-[#001F5E]'
-                  }`}
+                  className={`relative cursor-pointer text-xs font-bold px-4 py-2 rounded-full transition-colors duration-200 ${isActive ? 'text-[#FF8C00]' : 'text-slate-600 hover:text-[#001F5E]'
+                    }`}
                 >
                   <span className="relative z-10">{item.label}</span>
                   {isActive && (
@@ -120,11 +119,11 @@ export default function Navbar() {
       </div>
 
       {/* ─── MOBILE TOP HEADER ───────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 py-2.5 flex items-center justify-between shadow-sm">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 px-6 py-2 flex items-center justify-between shadow-sm">
         <Link to="/" className="flex items-center no-underline">
-          <BAIOLogo className="h-10 w-auto" />
+          <BAIOLogo className="h-14 w-auto hover:scale-105 transition-transform duration-305 " />
         </Link>
-        
+
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <Link
@@ -155,9 +154,8 @@ export default function Navbar() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`relative cursor-pointer p-2 rounded-full transition-colors ${
-                  isActive ? 'text-[#FF8C00]' : 'text-slate-500 hover:text-[#001F5E]'
-                }`}
+                className={`relative cursor-pointer p-2 rounded-full transition-colors ${isActive ? 'text-[#FF8C00]' : 'text-slate-500 hover:text-[#001F5E]'
+                  }`}
               >
                 <Icon size={20} strokeWidth={2.5} className="relative z-10" />
                 {isActive && (

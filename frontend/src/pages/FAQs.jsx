@@ -9,11 +9,11 @@ const faqSections = [
     faqs: [
       {
         q: 'What is BAIO?',
-        a: "BAIO — Bharat AI Olympiad — is India's first national AI literacy competition for students from Class 3 to Class 8. It tests computational thinking and AI understanding aligned with CBSE's CTAI 2026-27 framework and NEP 2020.",
+        a: "BAIO — Bharat AI Olympiad — is India's first national AI literacy competition for students from Grade 3 to Grade 8. It tests computational thinking and AI understanding aligned with CBSE's CTAI 2026-27 framework and NEP 2020.",
       },
       {
-        q: 'How is BAIO different from SOF or other olympiads?',
-        a: "SOF olympiads test Maths, Science, and English — subjects with decades of olympiad tradition. BAIO tests AI and computational thinking, the subject CBSE has mandated under CTAI 2026-27 that no existing olympiad addresses. The majority of our founding partner schools run both.",
+        q: 'We already do other olympiads — why BAIO?',
+        a: "Traditional olympiads test Maths, Science, and English — subjects with decades of academic tradition. BAIO tests AI, computational thinking, and technology concepts, which are mandated under the CBSE CTAI 2026-27 framework but not addressed by traditional exams. The majority of our partner schools successfully run both in parallel.",
       },
       {
         q: 'Who runs BAIO?',
@@ -31,23 +31,31 @@ const faqSections = [
     faqs: [
       {
         q: 'What is the exam format?',
-        a: 'The BAIO exam is 60 minutes long, pen-and-paper, with no computers or internet required. It has four sections: Section A (CT & Logical Reasoning), Section B (AI & Technology Concepts), Section C (Everyday AI Around Us), and Section D (HOTS Achiever\'s Section). Preparatory Stage (Classes 3-5) is 35 questions / 40 marks. Middle Stage (Classes 6-8) is 45 questions / 50 marks.',
+        a: "The BAIO exam is 60 minutes long, pen-and-paper, with no computers or internet required. It has four sections: Section A (CT & Logical Reasoning), Section B (AI & Technology Concepts), Section C (Everyday AI Around Us), and Section D (Innovation Arena). Preparatory Stage (Grades 3-5) is 35 questions / 40 marks. Middle Stage (Grades 6-8) is 45 questions / 50 marks.",
       },
       {
-        q: 'Is the paper the same for all classes?',
-        a: 'No. Each grade has a completely independent paper. A Class 3 paper and a Class 8 paper are not the same questions at different difficulty levels — they are entirely different thinking tasks designed for each student\'s cognitive and academic stage.',
+        q: 'Is the paper the same for all grades?',
+        a: "No. Each grade has a completely independent paper. A Grade 3 paper and a Grade 8 paper are not the same questions at different difficulty levels — they are entirely different thinking tasks designed for each student's cognitive and academic stage.",
       },
       {
         q: 'What does the syllabus cover?',
-        a: 'The syllabus is fully aligned with CBSE CTAI 2026-27. It covers algorithmic thinking, AI learning types (supervised, unsupervised, reinforcement), data science, computer vision, NLP, responsible AI, India\'s DPDP Act 2023, the IndiaAI Mission, and real-world Indian AI applications like Bhashini, DigiYatra, IRCTC, and UPI fraud detection.',
+        a: "The syllabus is fully aligned with CBSE CTAI 2026-27. It covers algorithmic thinking, AI learning types (supervised, unsupervised, reinforcement), data science, computer vision, NLP, responsible AI, India's DPDP Act 2023, the IndiaAI Mission, and real-world Indian AI applications like Bhashini, DigiYatra, IRCTC, and UPI fraud detection.",
       },
       {
         q: 'How does the CTAI alignment work?',
-        a: 'We conducted a 47-outcome audit of the CBSE CTAI 2026-27 curriculum before launching BAIO v2. Every BAIO question is mapped to a specific CTAI competency code. Our alignment scores: Class 3 (97%), Class 4 (96%), Class 5 (93%), Class 6 (94%), Class 7 (92%), Class 8 (95%).',
+        a: 'We conducted a 47-outcome audit of the CBSE CTAI 2026-27 curriculum before launching BAIO v2. Every BAIO question is mapped to a specific CTAI competency code. Our alignment scores: Grade 3 (97%), Grade 4 (96%), Grade 5 (93%), Grade 6 (94%), Grade 7 (92%), Grade 8 (95%).',
+      },
+      {
+        q: 'Do students need coding skills?',
+        a: "No. Coding skills or programming language knowledge is not required. BAIO is a cognitive assessment evaluating computational thinking, logical patterns, tech awareness, and ethics, rather than writing lines of code.",
+      },
+      {
+        q: 'Do we need a computer lab?',
+        a: "No. The BAIO exam is a completely pen-and-paper assessment. Schools do not need a computer lab, active internet connections, or any student devices. All booklets and sheets are delivered directly to your school for students to complete at their desks.",
       },
       {
         q: 'Are sample papers available?',
-        a: 'Yes. Sample questions and section descriptions are published on our Olympiad page. Schools that register receive a complete sample paper pack from their dedicated coordinator.',
+        a: 'Yes. Sample questions and section descriptions are published on our Syllabus page. Schools that register receive a complete sample paper pack from their dedicated coordinator.',
       },
     ],
   },
@@ -60,7 +68,7 @@ const faqSections = [
         a: 'A principal or school coordinator fills the two-minute registration form on baio.in. Within 24 hours, a dedicated BAIO School Coordinator is assigned to the school. The coordinator takes responsibility for every step from there — exam materials, date selection, and results delivery.',
       },
       {
-        q: 'Is there a per-student fee charged to parents?',
+        q: 'Is there a per-student fee for parents?',
         a: "No. BAIO is a school registration — a single fee that covers all student materials, printed certificates, the AI Readiness Report, and leaderboard listing for the entire school. There is no separate per-student charge to parents. The school registration cost is managed by the school.",
       },
       {
@@ -79,7 +87,7 @@ const faqSections = [
     faqs: [
       {
         q: 'When are results declared?',
-        a: 'Results are delivered within 10 working days of BAIO receiving your school\'s answer sheets. Results are published on the BAIO National Leaderboard.',
+        a: "Official exam results, leaderboard rankings, and physical student certificates are delivered within 30-40 days of BAIO receiving your school's answer sheets. However, the diagnostic Grade-by-Grade AI Readiness Report is delivered to the principal within 10 working days.",
       },
       {
         q: 'What certificates do students receive?',
@@ -87,7 +95,7 @@ const faqSections = [
       },
       {
         q: 'What is the AI Readiness Report?',
-        a: "The AI Readiness Report is a class-by-class diagnostic delivered to the school principal. It shows class-wise average scores, CTAI competency-level analysis, comparison against city and national averages, individual student score sheets, and curriculum recommendations. It is the only school-level AI literacy diagnostic that exists in India.",
+        a: "The AI Readiness Report is a grade-by-grade diagnostic delivered to the school principal. It shows grade-wise average scores, CTAI competency-level analysis, comparison against city and national averages, individual student score sheets, and curriculum recommendations. It is the only school-level AI literacy diagnostic that exists in India.",
       },
       {
         q: 'Is the national leaderboard public?',
@@ -102,6 +110,10 @@ const faqSections = [
       {
         q: 'Should I prepare my child specifically for BAIO?',
         a: "BAIO tests what CBSE's CTAI framework already expects students to know. If your child follows the CBSE curriculum in their school, they are already being exposed to the concepts BAIO tests. There is no specific BAIO preparation required. The exam is designed to assess natural understanding, not coached performance.",
+      },
+      {
+        q: 'My child is in Grade 3 — is AI too advanced?',
+        a: "Not at all. The BAIO syllabus for Grade 3 is designed around foundational computational logic, basic pattern recognition, and everyday technology concepts (such as how smart assistants understand voice commands). It is cognitively structured for their age, containing no complex coding or advanced math.",
       },
       {
         q: 'What does my child win if they do well?',

@@ -278,6 +278,79 @@ const searchResult = asyncHandler(async (req, res) => {
   );
 });
 
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PUBLISH RESULTS SCHOOL-WISE
+   PATCH /api/v1/results/publish/school/:schoolId
+   Body: { isPublished: true|false }
+   Access: Admin only (results:write)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const publishResultsForSchool = asyncHandler(async (req, res) => {
+  const { schoolId } = req.params;
+  const { isPublished } = req.body;
+
+  if (isPublished === undefined) {
+    throw new ApiError(400, 'isPublished field is required in request body.');
+  }
+
+  assertObjectId(schoolId);
+  const school = await School.findById(schoolId);
+  if (!school) throw new ApiError(404, 'School not found.');
+
+  // Find participants for this school
+  const participants = await Participant.find({ schoolId }).select('_id').lean();
+  const participantIds = participants.map(p => p._id);
+
+  const updateResult = await Result.updateMany(
+    { participantId: { $in: participantIds } },
+    {
+      $set: {
+        isPublished: !!isPublished,
+        publishedAt: isPublished ? new Date() : null
+      }
+    }
+  );
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { matchedCount: updateResult.matchedCount, modifiedCount: updateResult.modifiedCount },
+      `Successfully ${isPublished ? 'published' : 'unpublished'} results for school "${school.name}".`
+    )
+  );
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   PUBLISH ALL RESULTS GLOBALLY
+   PATCH /api/v1/results/publish/all
+   Body: { isPublished: true|false }
+   Access: Admin only (results:write)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+const publishAllResults = asyncHandler(async (req, res) => {
+  const { isPublished } = req.body;
+
+  if (isPublished === undefined) {
+    throw new ApiError(400, 'isPublished field is required in request body.');
+  }
+
+  const updateResult = await Result.updateMany(
+    {},
+    {
+      $set: {
+        isPublished: !!isPublished,
+        publishedAt: isPublished ? new Date() : null
+      }
+    }
+  );
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { matchedCount: updateResult.matchedCount, modifiedCount: updateResult.modifiedCount },
+      `Successfully ${isPublished ? 'published' : 'unpublished'} all results globally.`
+    )
+  );
+});
+
 module.exports = {
   createResult,
   updateResult,
@@ -285,4 +358,6 @@ module.exports = {
   listResults,
   getOwnResults,
   searchResult,
+  publishResultsForSchool,
+  publishAllResults,
 };

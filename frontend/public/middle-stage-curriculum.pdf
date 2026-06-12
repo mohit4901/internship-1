@@ -1,0 +1,136 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 595 842] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 2905 >>
+stream
+BT
+/F1 18 Tf
+72 770 Td
+(BAIO Middle Stage Curriculum \(Grades 6-8\)) Tj
+0 -24 Td
+/F1 11 Tf
+(Bharat AI Olympiad - CBSE CTAI 2026-27 Aligned Framework) Tj
+0 -30 Td
+/F1 13 Tf
+(1. EXAM PATTERN & MARKING SCHEME) Tj
+0 -18 Td
+/F1 9 Tf
+(Total Questions: 45 | Duration: 60 minutes | Total Marks: 50 Marks) Tj
+0 -14 Td
+/F1 9 Tf
+(Section A: CT & Logical Reasoning \(15 Questions, 15 Marks\)) Tj
+0 -14 Td
+/F1 9 Tf
+(Section B: AI & Technology Concepts \(15 Questions, 15 Marks\)) Tj
+0 -14 Td
+/F1 9 Tf
+(Section C: Everyday AI Around Us \(10 Questions, 10 Marks\)) Tj
+0 -14 Td
+/F1 9 Tf
+(Section D: Innovation Arena \(5 Questions, 10 Marks - 2 Marks each\)) Tj
+0 -14 Td
+/F1 9 Tf
+(There is no negative marking.) Tj
+0 -14 Td
+0 -10 Td
+/F1 13 Tf
+(2. GRADE 6 SYLLABUS & OUTCOMES) Tj
+0 -18 Td
+/F1 9 Tf
+(Logical Units: Greedy algorithms, bubble sort full trace, binary search) Tj
+0 -12 Td
+(efficiency, Euler's formula, cyclic patterns, De Morgan's laws, algorithm) Tj
+0 -12 Td
+(efficiency O-notation introduction.) Tj
+0 -14 Td
+/F1 9 Tf
+(AI Units: Human vs machine intelligence, learning types in depth, four data) Tj
+0 -12 Td
+(types, digital footprints, secure passwords, phishing recognition, privacy) Tj
+0 -12 Td
+(measures.) Tj
+0 -14 Td
+/F1 9 Tf
+(Sample Question: A town's AI traffic system reduces total waiting time by 25%) Tj
+0 -12 Td
+(but increases waiting time at one low-income crossing by 40%. Is this fair? What) Tj
+0 -12 Td
+(design principle should be added?) Tj
+0 -14 Td
+0 -10 Td
+/F1 13 Tf
+(3. GRADE 7 SYLLABUS & OUTCOMES) Tj
+0 -18 Td
+/F1 9 Tf
+(Logical Units: Recursion \(base case, recursive case\), divide-and-conquer \(merge) Tj
+0 -12 Td
+(sort\), stacks \(LIFO\), queues \(FIFO\), BFS vs DFS, XOR and De Morgan's Laws,) Tj
+0 -12 Td
+(complexity comparison.) Tj
+0 -14 Td
+/F1 9 Tf
+(AI Units: Regression, classification, clustering, computer vision \(CNNs\), NLP) Tj
+0 -12 Td
+(limitations, data science \(collecting, cleaning, visualising\), digital) Tj
+0 -12 Td
+(citizenship.) Tj
+0 -14 Td
+/F1 9 Tf
+(Sample Question: An AI loan system trained on 2010-2020 data denies women at) Tj
+0 -12 Td
+(twice the rate of equally qualified men. Give two causes of this bias and how to) Tj
+0 -12 Td
+(fix it.) Tj
+0 -14 Td
+0 -10 Td
+/F1 13 Tf
+(4. GRADE 8 SYLLABUS & OUTCOMES) Tj
+0 -18 Td
+/F1 9 Tf
+(Logical Units: Dijkstra's shortest path algorithm, dynamic programming, hash) Tj
+0 -12 Td
+(tables, binary-to-decimal \(1011=11\), hexadecimal \(#FF0000=red\), adjacency) Tj
+0 -12 Td
+(matrices.) Tj
+0 -14 Td
+/F1 9 Tf
+(AI Units: CTAI AI lifecycle \(Define, Collect, Test, Reflect\), Teachable Machine,) Tj
+0 -12 Td
+(ML for Kids, data fairness, explainable AI, DPDP Act 2023, IndiaAI Mission.) Tj
+0 -14 Td
+/F1 9 Tf
+(Sample Question: Design an AI project using Teachable Machine to help visually) Tj
+0 -12 Td
+(impaired students navigate school - applying all four stages of the CTAI project) Tj
+0 -12 Td
+(lifecycle.) Tj
+0 -14 Td
+0 -10 Td
+ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000220 00000 n 
+0000000302 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+3169
+%%EOF

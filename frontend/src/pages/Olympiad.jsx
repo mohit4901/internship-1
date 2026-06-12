@@ -7,19 +7,19 @@ const prepStage = [
   { sec: 'A', title: 'CT & Logical Reasoning', struct: '10 × 1 mark', marks: '10' },
   { sec: 'B', title: 'AI & Technology Concepts', struct: '10 × 1 mark', marks: '10' },
   { sec: 'C', title: 'Everyday AI Around Us', struct: '10 × 1 mark', marks: '10' },
-  { sec: 'D', title: 'HOTS — Achiever\'s Section', struct: '5 × 2 marks', marks: '10' },
+  { sec: 'D', title: 'Innovation Arena', struct: '5 × 2 marks', marks: '10' },
 ];
 
 const midStage = [
   { sec: 'A', title: 'CT & Logical Reasoning', struct: '15 × 1 mark', marks: '15' },
   { sec: 'B', title: 'AI & Technology Concepts', struct: '15 × 1 mark', marks: '15' },
   { sec: 'C', title: 'Everyday AI Around Us', struct: '10 × 1 mark', marks: '10' },
-  { sec: 'D', title: 'HOTS — Achiever\'s Section', struct: '5 × 2 marks', marks: '10' },
+  { sec: 'D', title: 'Innovation Arena', struct: '5 × 2 marks', marks: '10' },
 ];
 
 const gradeCards = [
   {
-    grade: 'Class 3',
+    grade: 'Grade 3',
     stage: 'Preparatory Stage',
     tagline: 'Discovering that computers can learn.',
     borderClass: 'edu-border-green',
@@ -30,18 +30,18 @@ const gradeCards = [
     hots: 'A computer is given the rule: IF number is even, PRINT EVEN. IF number is odd, PRINT ODD. For the number 7, what does the computer print, and why?',
   },
   {
-    grade: 'Class 4',
+    grade: 'Grade 4',
     stage: 'Preparatory Stage',
     tagline: 'Flowcharts, decision-making, and machine data.',
     borderClass: 'edu-border-orange',
     shadowClass: 'edu-shadow-orange',
     textColor: 'text-brand-orange',
-    ct: 'Flowcharts with YES/NO decision diamonds, input-output function rules, multi-step decomposition, mirror images and symmetry, grid movements, bubble sort basics, loops.',
+    ct: 'Flowcharts with YES/NO decision diamonds, input-output function rules, multi-step decomposition, mirror images and symmetry, grid movements, loop patterns.',
     ai: 'Training data and supervised learning. Why spam filters work. How IRCTC AI detects fraud bots. Differences between AI and automation.',
     hots: 'An AI recommends "Study more" IF exam is tomorrow AND score < 70. Rohan\'s exam is tomorrow and his score is 65. What does the AI recommend?',
   },
   {
-    grade: 'Class 5',
+    grade: 'Grade 5',
     stage: 'Preparatory Stage',
     tagline: 'Complex patterns, learning types, and ethics.',
     borderClass: 'edu-border-navy',
@@ -52,7 +52,7 @@ const gradeCards = [
     hots: 'A table shows rainfall and crop yield over 4 years. More rain = more yield. What AI technique models this relationship? Predict yield for 300mm rain.',
   },
   {
-    grade: 'Class 6',
+    grade: 'Grade 6',
     stage: 'Middle Stage',
     tagline: 'CTAI AI syllabus — learning, data, safety.',
     borderClass: 'edu-border-navy',
@@ -63,7 +63,7 @@ const gradeCards = [
     hots: 'A town\'s AI traffic system reduces total waiting time by 25% but increases waiting time at one low-income crossing by 40%. Is this fair? What design principle should be added?',
   },
   {
-    grade: 'Class 7',
+    grade: 'Grade 7',
     stage: 'Middle Stage',
     tagline: 'Regression, clustering, and data analysis.',
     borderClass: 'edu-border-green',
@@ -74,7 +74,7 @@ const gradeCards = [
     hots: 'An AI loan system trained on 2010-2020 data denies women at twice the rate of equally qualified men. Give two causes of this bias and how to fix it.',
   },
   {
-    grade: 'Class 8',
+    grade: 'Grade 8',
     stage: 'Middle Stage',
     tagline: 'Lifecycle, no-code, and responsible innovation.',
     borderClass: 'edu-border-orange',
@@ -87,12 +87,12 @@ const gradeCards = [
 ];
 
 const ctaiAlignment = [
-  { grade: 'Class 3', pct: 97, details: 'Spatial reasoning & mirror patterns integrated' },
-  { grade: 'Class 4', pct: 96, details: 'Decision flowcharts & data training added' },
-  { grade: 'Class 5', pct: 93, details: 'Decomposition matrices & ethical bias models' },
-  { grade: 'Class 6', pct: 94, details: 'Digital safety, passwords, phishing safety' },
-  { grade: 'Class 7', pct: 92, details: 'Data regressions & visualization charts' },
-  { grade: 'Class 8', pct: 95, details: 'AI Lifecycle, DPDP Act 2023 frameworks' },
+  { grade: 'Grade 3', pct: 97, details: 'Spatial reasoning & mirror patterns integrated' },
+  { grade: 'Grade 4', pct: 96, details: 'Decision flowcharts & data training added' },
+  { grade: 'Grade 5', pct: 93, details: 'Decomposition matrices & ethical bias models' },
+  { grade: 'Grade 6', pct: 94, details: 'Digital safety, passwords, phishing safety' },
+  { grade: 'Grade 7', pct: 92, details: 'Data regressions & visualization charts' },
+  { grade: 'Grade 8', pct: 95, details: 'AI Lifecycle, DPDP Act 2023 frameworks' },
 ];
 
 const awards = [
@@ -159,7 +159,7 @@ export default function OlympiadPage() {
           {/* Prep Stage Card */}
           <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 edu-shadow flex flex-col justify-between">
             <div className="bg-brand-green text-white p-6 border-b border-brand-navy/10">
-              <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">Classes 3–5</span>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">Grades 3–5</span>
               <h2 className="text-2xl font-extrabold mt-2">Preparatory Stage</h2>
               <p className="text-xs text-slate-100 mt-1">35 Questions · 40 Marks · 60 Minutes</p>
             </div>
@@ -196,7 +196,7 @@ export default function OlympiadPage() {
           {/* Middle Stage Card */}
           <div className="bg-white rounded-3xl overflow-hidden border border-slate-200 edu-shadow flex flex-col justify-between">
             <div className="bg-brand-navy text-white p-6 border-b border-brand-navy/10">
-              <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">Classes 6–8</span>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2 py-0.5 rounded">Grades 6–8</span>
               <h2 className="text-2xl font-extrabold mt-2">Middle Stage</h2>
               <p className="text-xs text-slate-100 mt-1">45 Questions · 50 Marks · 60 Minutes</p>
             </div>
@@ -239,7 +239,7 @@ export default function OlympiadPage() {
           
           <div className="text-center space-y-4">
             <span className="brand-badge brand-badge-orange">
-              Class Modules
+              Grade Modules
             </span>
             <h2 className="text-4xl font-extrabold text-brand-navy">
               Age-appropriate diagnostic papers.
@@ -272,7 +272,7 @@ export default function OlympiadPage() {
                 </div>
 
                 <div className="bg-white rounded-2xl p-4 border border-slate-150 shadow-inner">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-brand-orange block mb-1">HOTS Sample Question</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-brand-orange block mb-1">Innovation Arena Sample Question</span>
                   <p className="text-[11px] text-slate-700 leading-relaxed italic">"{g.hots}"</p>
                 </div>
 

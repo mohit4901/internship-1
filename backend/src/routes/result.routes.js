@@ -14,6 +14,8 @@ const {
   listResults,
   getOwnResults,
   searchResult,
+  publishResultsForSchool,
+  publishAllResults,
 } = require('../controllers/result.controller');
 
 // Middleware
@@ -57,6 +59,20 @@ router.get(
 /* ══════════════════════════════════════════════════════════════════════════════
    ADMIN CRUD ROUTES
    ══════════════════════════════════════════════════════════════════════════════ */
+
+// PATCH /api/v1/results/publish/school/:schoolId - Publish/unpublish results school-wise
+router.patch(
+  '/publish/school/:schoolId',
+  ...adminWrite,
+  publishResultsForSchool
+);
+
+// PATCH /api/v1/results/publish/all - Publish/unpublish all results globally
+router.patch(
+  '/publish/all',
+  ...adminWrite,
+  publishAllResults
+);
 
 // GET /api/v1/results - List results (admin only)
 router.get(

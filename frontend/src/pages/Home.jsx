@@ -17,6 +17,8 @@ import {
   FileSpreadsheet, ShieldAlert, Star, Trophy
 } from 'lucide-react';
 import logoImg from '../assets/logo.jpg';
+import SchoolMarquee from '../components/SchoolMarquee';
+import CurriculumModal from '../components/CurriculumModal';
 
 const wrap = (min, max, v) => {
   const range = max - min;
@@ -102,28 +104,28 @@ function ScrollVelocityMarquee() {
 
 function LogoShowcaseSection() {
   return (
-    <section className="py-12 px-6 bg-[#FAF9F6] relative overflow-hidden select-none">
+    <section className="py-16 px-6 bg-[#FAF9F6] relative overflow-hidden select-none">
       <div className="max-w-4xl mx-auto text-center space-y-6">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="bg-white border-4 border-[#001F5E] rounded-3xl p-8 md:p-12 shadow-[0_10px_0px_0px_#001F5E] flex flex-col items-center justify-center relative group"
+          className="bg-white border-4 border-[#001F5E] rounded-3xl p-8 md:p-12 shadow-[0_12px_0px_0px_#001F5E] flex flex-col items-center justify-center relative group border-t-[#FF8C00] border-t-8"
         >
           {/* Subtle background circuit pattern */}
           <div className="absolute inset-0 bg-[#FF8C00]/5 pointer-events-none circuit-bg opacity-35 rounded-[22px]" />
           
-          <span className="relative z-10 inline-block bg-[#001F5E] text-white font-black text-[10px] tracking-widest px-4 py-1.5 rounded-full uppercase mb-6 shadow-sm">
+          <span className="relative z-10 inline-block bg-[#001F5E] text-white font-black text-[10px] tracking-widest px-4 py-1.5 rounded-full uppercase mb-6 shadow-md border border-white/10">
             Official Brand Mark
           </span>
           
           {/* The Large Logo Image */}
-          <div className="relative z-10 w-full max-w-xl bg-white p-6 rounded-2xl border-2 border-slate-100 flex items-center justify-center shadow-inner overflow-hidden transition-transform duration-500 group-hover:scale-[1.02]">
+          <div className="relative z-10 w-full max-w-2xl bg-white p-8 rounded-2xl border-4 border-[#FF8C00]/25 flex items-center justify-center shadow-inner overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] group-hover:border-[#FF8C00]/50">
             <img 
               src={logoImg} 
               alt="Bharat AI Olympiad Official Logo" 
-              className="h-28 md:h-44 w-auto object-contain mix-blend-multiply transition-all duration-300"
+              className="h-36 md:h-56 w-auto object-contain mix-blend-multiply transition-all duration-300"
             />
           </div>
           
@@ -189,6 +191,7 @@ function FloatingPaths({ position, className }) {
 }
 
 export default function HomePage() {
+  const [activeCurriculumStage, setActiveCurriculumStage] = useState(null);
   const [titleNumber, setTitleNumber] = useState(0);
   const titles = useMemo(
     () => ["AI Olympiad", "CTAI Framework", "NEP 2020 Standard", "AI Literacy"],
@@ -216,19 +219,6 @@ export default function HomePage() {
         <FloatingPaths position={1} className="text-[#001F5E]" />
         <FloatingPaths position={-1} className="text-[#FF8C00]" />
         
-        {/* Floating Background Icons/Shapes */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Hot air balloon left */}
-          <div className="absolute top-10 left-[15%] w-8 h-12 opacity-80 hidden lg:block">
-            <svg viewBox="0 0 30 45" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 0C6.71 0 0 6.71 0 15C0 22.8 12.3 39.5 13.9 41.5C14.5 42.2 15.5 42.2 16.1 41.5C17.7 39.5 30 22.8 30 15C30 6.71 23.29 0 15 0Z" fill="#E2583E" />
-              <rect x="12" y="42" width="6" height="3" fill="#8C52FF" />
-            </svg>
-          </div>
-          {/* Tennis ball right */}
-          <div className="absolute top-10 right-[15%] w-6 h-6 rounded-full bg-[#A2D149] opacity-90 hidden lg:block" />
-        </div>
-
         <div className="max-w-7xl mx-auto flex flex-col items-center relative z-10">
           
           {/* Checkbox pills */}
@@ -244,7 +234,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Heading */}
+          {/* Heading with animated cycling title */}
           <div className="text-center max-w-3xl space-y-4">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#001F5E] leading-tight flex flex-col items-center justify-center">
               <span>India's First</span>
@@ -258,14 +248,8 @@ export default function HomePage() {
                     transition={{ type: "spring", stiffness: 50 }}
                     animate={
                       titleNumber === index
-                        ? {
-                            y: 0,
-                            opacity: 1,
-                          }
-                        : {
-                            y: titleNumber > index ? -150 : 150,
-                            opacity: 0,
-                          }
+                        ? { y: 0, opacity: 1 }
+                        : { y: titleNumber > index ? -150 : 150, opacity: 0 }
                     }
                   >
                     {title}
@@ -278,6 +262,7 @@ export default function HomePage() {
               Bharat AI Olympiad — BAIO
             </p>
           </div>
+
           {/* Button */}
           <div className="mt-8">
             <Link 
@@ -337,6 +322,8 @@ export default function HomePage() {
         </div>
       </section>
 
+
+
       <ScrollVelocityMarquee />
 
       {/* ─── STATS BAR ────────────────────────────────────────────── */}
@@ -381,7 +368,7 @@ export default function HomePage() {
                 </div>
                 <div className="border-t border-white/10 pt-2">
                   <h3 className="text-xl font-extrabold text-[#FF8C00]">6</h3>
-                  <p className="text-[10px] text-slate-400">Grade Levels — Class 3 to 8</p>
+                  <p className="text-[10px] text-slate-400">Grade Levels — Grade 3 to 8</p>
                 </div>
               </div>
             </div>
@@ -411,30 +398,30 @@ export default function HomePage() {
 
       {/* ─── WHY BAIO - BENTO GRID ────────────────────────────────── */}
       <section className="py-16 px-6 bg-white border-y border-slate-150">
-        <div className="max-w-6xl mx-auto space-y-10">
+        <div className="max-w-7xl mx-auto space-y-10">
           
           {/* Title Row */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
               <span className="text-[#FF8C00] font-bold text-xs uppercase tracking-wider">WHY BAIO</span>
-              <h2 className="text-3xl font-extrabold text-[#001F5E]">Six reasons 100+ schools chose BAIO.</h2>
+              <h2 className="text-3xl font-extrabold text-[#001F5E]">Eight reasons 100+ schools chose BAIO.</h2>
             </div>
             <div className="shrink-0">
               <Link to="/olympiad" className="inline-flex items-center gap-2 bg-[#001F5E] hover:bg-[#002880] text-white font-extrabold px-6 py-3 rounded-full text-xs shadow">
-                Explore the Olympiad
+                Explore the Syllabus
               </Link>
             </div>
           </div>
 
-          {/* Bento Grid Rows */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Bento Grid Rows - Balanced 4-column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* Card 1: Orange background */}
-            <div className="bg-[#FF8C00] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[200px]">
+            <div className="bg-[#FF8C00] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-sm hover:scale-[1.02] transition-transform duration-300">
               <div>
-                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">01 ■ Built on CBSE CTAI 2026-27</h3>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">01 ■ 100% CBSE CTAI Alignment</h3>
                 <p className="text-[11px] text-slate-100 leading-relaxed mt-2">
-                  Every single BAIO question maps to an exact CTAI competency code. We conducted a 47-outcome audit against the CBSE CTAI curriculum and achieved 92–97% alignment across all six grades.
+                  Every single BAIO question maps to an exact Computational Thinking & AI competency code. We conducted a 47-outcome audit against the CBSE CTAI curriculum and achieved 92–97% alignment across all grades.
                 </p>
               </div>
               <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
@@ -443,11 +430,11 @@ export default function HomePage() {
             </div>
 
             {/* Card 2: Green background */}
-            <div className="bg-[#0B7F3B] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[200px]">
+            <div className="bg-[#0B7F3B] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-sm hover:scale-[1.02] transition-transform duration-300">
               <div>
-                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">02 ■■ India's AI Story</h3>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">02 ■■ Inspire via India's AI Stories</h3>
                 <p className="text-[11px] text-slate-100 leading-relaxed mt-2">
-                  Our questions reference Bhashini, DigiYatra, PM Kisan, AI4Bharat, IRCTC, UPI fraud detection, Qure.ai, and the IndiaAI Mission. Students learn about the AI transforming their country.
+                  Our questions reference PM Kisan, Bhashini, DigiYatra, UPI fraud detection, Qure.ai, and the IndiaAI Mission, teaching students about the actual AI applications transforming their own country.
                 </p>
               </div>
               <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
@@ -456,11 +443,11 @@ export default function HomePage() {
             </div>
 
             {/* Card 3: Blue background */}
-            <div className="bg-[#4a90e2] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[200px]">
+            <div className="bg-[#4a90e2] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-sm hover:scale-[1.02] transition-transform duration-300">
               <div>
-                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">03 ■ Zero Work for Teachers</h3>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">03 ■ Zero Administrative Burden</h3>
                 <p className="text-[11px] text-slate-100 leading-relaxed mt-2">
-                  BAIO requires zero teacher training, zero syllabus change, and zero special infrastructure. The exam is 60 minutes on one day of your choosing. We deliver all physical booklets 5 days prior.
+                  BAIO requires zero teacher training, zero syllabus change, and zero computer lab infrastructure. Run the 60-minute exam on any day of your choice. We handle all physical booklet deliveries.
                 </p>
               </div>
               <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
@@ -469,24 +456,24 @@ export default function HomePage() {
             </div>
 
             {/* Card 4: Navy background */}
-            <div className="bg-[#001F5E] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[200px]">
+            <div className="bg-[#001F5E] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-md hover:scale-[1.02] transition-transform duration-300 border-2 border-[#FF8C00]/35">
               <div>
-                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">04 ■ A Diagnostic Tool</h3>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2 text-[#FF8C00]">04 ■ Drive Decisions with Insights</h3>
                 <p className="text-[11px] text-slate-200 leading-relaxed mt-2">
-                  After every BAIO, your school receives a class-by-class AI Readiness Report. It shows which CTAI skills your students have mastered, where curriculum gaps exist, and how your school compares.
+                  After the exam, the school receives a detailed Grade-by-Grade AI Readiness Report. It outlines mastered CTAI skills, average score benchmarks, regional comparisons, and concrete curriculum insights.
                 </p>
               </div>
-              <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
+              <div className="absolute right-4 bottom-4 w-12 h-12 opacity-25 text-white">
                 <Activity className="w-full h-full" />
               </div>
             </div>
 
             {/* Card 5: Orange background */}
-            <div className="bg-[#FF8C00] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[200px]">
+            <div className="bg-[#FF8C00] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-sm hover:scale-[1.02] transition-transform duration-300">
               <div>
-                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">05 ■ Real Recognition</h3>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">05 ■ Boost Confidence with Awards</h3>
                 <p className="text-[11px] text-slate-100 leading-relaxed mt-2">
-                  Gold, Silver, Bronze medals. An All-India BAIO Leaderboard. The AI Champion Award for national rank holders. A printed AI Readiness Certificate for every single participant.
+                  Gold, Silver, and Bronze medals for top performers. An All-India leaderboard listing. Printed AI Readiness Certificates for every participant, and custom merit letters to boost college portfolios.
                 </p>
               </div>
               <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
@@ -495,11 +482,11 @@ export default function HomePage() {
             </div>
 
             {/* Card 6: Green background */}
-            <div className="bg-[#0B7F3B] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[200px]">
+            <div className="bg-[#0B7F3B] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-sm hover:scale-[1.02] transition-transform duration-300">
               <div>
-                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">06 ■ Ahead of the Curve</h3>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">06 ■ Future-Proof Skills Focus</h3>
                 <p className="text-[11px] text-slate-100 leading-relaxed mt-2">
-                  BAIO covers everything the CTAI mandates — and then goes further. Federated learning, generative AI, responsible innovation, deepfakes in democracy, India's DPDP Act 2023, and the IndiaAI Mission.
+                  We cover standard computational logic and then go beyond: federated learning, generative AI, responsible innovation ethics, deepfakes, data privacy under the DPDP Act 2023, and the IndiaAI Mission.
                 </p>
               </div>
               <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
@@ -507,6 +494,114 @@ export default function HomePage() {
               </div>
             </div>
 
+            {/* Card 7: Blue background */}
+            <div className="bg-[#4a90e2] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-sm hover:scale-[1.02] transition-transform duration-300">
+              <div>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">07 ■ Flexible On-Demand Scheduling</h3>
+                <p className="text-[11px] text-slate-100 leading-relaxed mt-2">
+                  Schedule your school's exam on any day that matches your academic cycle, session plans, or school holidays. We accommodate your calendar to ensure zero disruption.
+                </p>
+              </div>
+              <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
+                <Calendar className="w-full h-full" />
+              </div>
+            </div>
+
+            {/* Card 8: Navy background */}
+            <div className="bg-[#001F5E] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between h-[220px] shadow-sm hover:scale-[1.02] transition-transform duration-300">
+              <div>
+                <h3 className="font-extrabold text-sm border-b border-white/20 pb-2">08 ■ Equip with Digital Credentials</h3>
+                <p className="text-[11px] text-slate-200 leading-relaxed mt-2">
+                  Every student receives a digital badge and verified credential that can be showcased on LinkedIn or school portfolios, highlighting early AI competency.
+                </p>
+              </div>
+              <div className="absolute right-4 bottom-4 w-12 h-12 opacity-20 text-white">
+                <Sparkles className="w-full h-full" />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─── "WHY BAIO? / HOW IS BAIO DIFFERENT?" SECTION ───────────────── */}
+      <section className="py-20 px-6 bg-[#FAF9F6] border-b border-slate-150">
+        <div className="max-w-6xl mx-auto space-y-12">
+          
+          <div className="text-center space-y-3">
+            <span className="brand-badge brand-badge-orange">Why BAIO?</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-[#001F5E]">How is BAIO Different?</h2>
+            <p className="text-slate-500 max-w-xl mx-auto text-xs md:text-sm font-bold">
+              A side-by-side comparison of BAIO's modern capabilities versus traditional choices.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            {/* Traditional Olympiads Card */}
+            <div className="bg-white border-4 border-slate-200 rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between shadow-sm">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 font-extrabold text-sm shrink-0">
+                    ✕
+                  </div>
+                  <h3 className="text-lg font-black text-slate-550">Traditional Olympiads</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="border-b border-slate-100 pb-3">
+                    <h4 className="font-extrabold text-xs text-slate-700 uppercase tracking-wider">Rote Memory Learning</h4>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">Focuses on static formulas and legacy concepts from decades-old computer science topics.</p>
+                  </div>
+                  <div className="border-b border-slate-100 pb-3">
+                    <h4 className="font-extrabold text-xs text-slate-700 uppercase tracking-wider">Heavy Administrative Preparation</h4>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">Requires teachers to lead specialized preparation courses and coordinate complex syllabus packages.</p>
+                  </div>
+                  <div className="border-b border-slate-100 pb-3">
+                    <h4 className="font-extrabold text-xs text-slate-700 uppercase tracking-wider">No School-Level Analytics</h4>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">Delivers individual student scorecards without any diagnostic insights into school-wide curriculum gaps.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-xs text-slate-700 uppercase tracking-wider">Device or Computer Lab Dependency</h4>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">Often requires setting up physical computers, software configurations, or stable internet setups.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* BAIO Card */}
+            <div className="bg-[#001F5E] text-white border-4 border-[#001F5E] rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between shadow-[0_12px_24px_rgba(0,31,94,0.15)] border-t-[#FF8C00] border-t-8">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#FF8C00] opacity-10 rounded-full blur-2xl" />
+              
+              <div className="space-y-6 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-extrabold text-sm shrink-0">
+                    ✓
+                  </div>
+                  <h3 className="text-lg font-black text-[#FF8C00]">Bharat AI Olympiad (BAIO)</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="border-b border-white/10 pb-3">
+                    <h4 className="font-extrabold text-xs text-[#FFB040] uppercase tracking-wider">Computational Thinking & Reasoning</h4>
+                    <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">Tests logical problem solving, algorithmic flows, machine learning models, and real-world technology ethics.</p>
+                  </div>
+                  <div className="border-b border-white/10 pb-3">
+                    <h4 className="font-extrabold text-xs text-[#FFB040] uppercase tracking-wider">Zero Teacher Burden</h4>
+                    <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">No special preparation required. Your assigned BAIO coordinator manages everything from setup to scores.</p>
+                  </div>
+                  <div className="border-b border-white/10 pb-3">
+                    <h4 className="font-extrabold text-xs text-[#FFB040] uppercase tracking-wider">Grade-by-Grade Readiness Reports</h4>
+                    <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">Delivers a full diagnostic report for school boards to benchmark outcomes against regional and national cohorts.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-xs text-[#FFB040] uppercase tracking-wider">100% Pen-and-Paper Assessment</h4>
+                    <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">No computers, internet, or software installations. Students complete the exam at their regular school desks.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
       </section>
@@ -529,7 +624,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-bold text-xs text-[#001F5E] mt-3">Section A</h3>
               <p className="text-[10px] text-slate-800 font-bold">CT & Logical Reasoning</p>
-              <p className="text-[9px] text-slate-500 mt-0.5">Classes 3–5: 10 Marks | Classes 6–8: 15 Marks</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">Grades 3–5: 10 Marks | Grades 6–8: 15 Marks</p>
             </div>
 
             {/* Circle 2 */}
@@ -539,7 +634,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-bold text-xs text-[#001F5E] mt-3">Section B</h3>
               <p className="text-[10px] text-slate-800 font-bold">AI & Technology Concepts</p>
-              <p className="text-[9px] text-slate-500 mt-0.5">Classes 3–5: 10 Marks | Classes 6–8: 15 Marks</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">Grades 3–5: 10 Marks | Grades 6–8: 15 Marks</p>
             </div>
 
             {/* Circle 3 */}
@@ -549,7 +644,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-bold text-xs text-[#001F5E] mt-3">Section C</h3>
               <p className="text-[10px] text-slate-800 font-bold">Everyday AI Around Us</p>
-              <p className="text-[9px] text-slate-500 mt-0.5">Classes 3–5: 10 Marks | Classes 6–8: 10 Marks</p>
+              <p className="text-[9px] text-slate-500 mt-0.5">Grades 3–5: 10 Marks | Grades 6–8: 10 Marks</p>
             </div>
 
             {/* Circle 4 */}
@@ -558,7 +653,7 @@ export default function HomePage() {
                 <Sparkles className="w-8 h-8" />
               </div>
               <h3 className="font-bold text-xs text-[#001F5E] mt-3">Section D</h3>
-              <p className="text-[10px] text-slate-800 font-bold">HOTS — Achiever's Section</p>
+              <p className="text-[10px] text-slate-800 font-bold">Innovation Arena</p>
               <p className="text-[9px] text-slate-500 mt-0.5">All Grades: 10 Marks (5 Qs × 2 Marks)</p>
             </div>
 
@@ -573,18 +668,21 @@ export default function HomePage() {
           {/* Card 1: Yellow/Orange Background */}
           <div className="bg-[#FFB040] text-[#001F5E] rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between h-[250px] shadow-sm">
             <div className="space-y-2 max-w-[70%]">
-              <h3 className="text-xl font-extrabold text-[#001F5E]">Preparatory Stage — Classes 3, 4 & 5</h3>
+              <h3 className="text-xl font-extrabold text-[#001F5E]">Preparatory Stage — Grades 3, 4 & 5</h3>
               <p className="text-[10px] text-[#001F5E]/90 font-bold">
                 TOTAL: 35 Questions · 40 Marks · 60 Minutes
               </p>
               <p className="text-[10px] text-slate-800 leading-relaxed font-semibold">
-                Section A: 10 Marks | Section B: 10 Marks | Section C: 10 Marks | Section D (HOTS): 10 Marks
+                Section A: 10 Marks | Section B: 10 Marks | Section C: 10 Marks | Section D (Innovation Arena): 10 Marks
               </p>
             </div>
             <div className="mt-4">
-              <Link to="/register" className="inline-flex items-center gap-2 bg-[#001F5E] text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-md">
-                Register Your School <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
+              <button
+                onClick={() => setActiveCurriculumStage('preparatory')}
+                className="inline-flex items-center gap-2 bg-[#001F5E] text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-md hover:bg-[#002880] transition-colors cursor-pointer"
+              >
+                View Preparatory Curriculum <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
             {/* Simple educational icon graphic on right */}
             <div className="absolute right-4 bottom-4 w-20 h-20 opacity-20 text-[#001F5E]">
@@ -595,18 +693,21 @@ export default function HomePage() {
           {/* Card 2: Coral Background */}
           <div className="bg-[#FF8C00] text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between h-[250px] shadow-sm">
             <div className="space-y-2 max-w-[70%]">
-              <h3 className="text-xl font-extrabold text-white">Middle Stage — Classes 6, 7 & 8</h3>
+              <h3 className="text-xl font-extrabold text-white">Middle Stage — Grades 6, 7 & 8</h3>
               <p className="text-[10px] text-slate-100 font-bold">
                 TOTAL: 45 Questions · 50 Marks · 60 Minutes
               </p>
               <p className="text-[10px] text-slate-100/90 leading-relaxed">
-                Section A: 15 Marks | Section B: 15 Marks | Section C: 10 Marks | Section D (HOTS): 10 Marks
+                Section A: 15 Marks | Section B: 15 Marks | Section C: 10 Marks | Section D (Innovation Arena): 10 Marks
               </p>
             </div>
             <div className="mt-4">
-              <Link to="/olympiad" className="inline-flex items-center gap-2 bg-white text-brand-orange text-xs font-bold px-5 py-2.5 rounded-full shadow-md">
-                Explore the Olympiad <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
+              <button
+                onClick={() => setActiveCurriculumStage('middle')}
+                className="inline-flex items-center gap-2 bg-white text-brand-orange text-xs font-bold px-5 py-2.5 rounded-full shadow-md hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                View Middle Stage Curriculum <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
             {/* Simple educational icon graphic on right */}
             <div className="absolute right-4 bottom-4 w-20 h-20 opacity-20 text-white">
@@ -641,7 +742,7 @@ export default function HomePage() {
                 CBSE recognised this. NEP 2020 recognised this. CTAI 2026-27 was built in response to this gap. BAIO is the competition that makes CTAI real, tangible, and nationally celebrated.
               </p>
               <p className="text-[11px] text-slate-500">
-                The World Economic Forum projects that 65% of today's Class 3 students will work in jobs that do not yet exist — and AI fluency will be the single most common requirement across all of them. We are not preparing students for the future. We are preparing them for a future that is already here.
+                The World Economic Forum projects that 65% of today's Grade 3 students will work in jobs that do not yet exist — and AI fluency will be the single most common requirement across all of them. We are not preparing students for the future. We are preparing them for a future that is already here.
               </p>
             </div>
             <div className="pt-2">
@@ -724,13 +825,13 @@ export default function HomePage() {
               <div className="border-l-2 border-[#001F5E]/30 pl-4 py-1">
                 <h4 className="font-extrabold text-sm">Step 04: We Handle Marking and Analysis</h4>
                 <p className="text-slate-800 text-[11px] leading-relaxed mt-0.5">
-                  Answer sheets are returned to BAIO. Our team marks all papers, generates individual student scores, compiles the school's class-wise AI Readiness Report, and calculates rankings.
+                  Answer sheets are returned to BAIO. Our team marks all papers, generates individual student scores, compiles the school's grade-wise AI Readiness Report, and calculates rankings.
                 </p>
               </div>
               <div className="border-l-2 border-[#001F5E]/30 pl-4 py-1">
                 <h4 className="font-extrabold text-sm">Step 05: Results, Certificates, and Celebration</h4>
                 <p className="text-slate-800 text-[11px] leading-relaxed mt-0.5">
-                  Results are published on the BAIO National Leaderboard. Printed certificates are dispatched. The principal receives the full AI Readiness Report. And your school earns the BAIO AI Ready Badge.
+                  Results are published on the BAIO National Leaderboard in 30-40 days. Printed certificates are dispatched. The principal receives the full grade-by-grade AI Readiness Report within 10 working days. And your school earns the BAIO AI Ready Badge.
                 </p>
               </div>
             </div>
@@ -780,7 +881,7 @@ export default function HomePage() {
             {/* Testimonial 3 */}
             <div className="bg-white border-2 border-slate-200 rounded-3xl p-6 flex flex-col justify-between h-[230px] shadow-sm">
               <p className="text-xs text-slate-600 italic leading-relaxed">
-                "What struck me most about BAIO is the depth. This is not a technology quiz. It tests genuine reasoning about AI, ethics, data, and societal impact. My Class 8 students came out of the exam room actually debating whether an AI should be allowed to make bail decisions."
+                "What struck me most about BAIO is the depth. This is not a technology quiz. It tests genuine reasoning about AI, ethics, data, and societal impact. My Grade 8 students came out of the exam room actually debating whether an AI should be allowed to make bail decisions."
               </p>
               <div className="border-t border-slate-100 pt-3 mt-3 flex items-center gap-2">
                 <span className="text-xs font-bold text-[#001F5E]">Ms. Priyanka Barara</span>
@@ -825,6 +926,16 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ─── PARTNER SCHOOLS MARQUEE ──────────────────────────────────── */}
+      <SchoolMarquee />
+
+      {/* Curriculum Modal */}
+      <CurriculumModal
+        isOpen={activeCurriculumStage !== null}
+        stage={activeCurriculumStage}
+        onClose={() => setActiveCurriculumStage(null)}
+      />
 
     </div>
   );

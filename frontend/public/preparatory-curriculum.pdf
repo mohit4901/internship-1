@@ -1,0 +1,132 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 595 842] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 2804 >>
+stream
+BT
+/F1 18 Tf
+72 770 Td
+(BAIO Preparatory Stage Curriculum \(Grades 3-5\)) Tj
+0 -24 Td
+/F1 11 Tf
+(Bharat AI Olympiad - CBSE CTAI 2026-27 Aligned Framework) Tj
+0 -30 Td
+/F1 13 Tf
+(1. EXAM PATTERN & MARKING SCHEME) Tj
+0 -18 Td
+/F1 9 Tf
+(Total Questions: 35 | Duration: 60 minutes | Total Marks: 40 Marks) Tj
+0 -14 Td
+/F1 9 Tf
+(Section A: CT & Logical Reasoning \(10 Questions, 10 Marks\)) Tj
+0 -14 Td
+/F1 9 Tf
+(Section B: AI & Technology Concepts \(10 Questions, 10 Marks\)) Tj
+0 -14 Td
+/F1 9 Tf
+(Section C: Everyday AI Around Us \(10 Questions, 10 Marks\)) Tj
+0 -14 Td
+/F1 9 Tf
+(Section D: Innovation Arena \(5 Questions, 10 Marks - 2 Marks each\)) Tj
+0 -14 Td
+/F1 9 Tf
+(There is no negative marking.) Tj
+0 -14 Td
+0 -10 Td
+/F1 13 Tf
+(2. GRADE 3 SYLLABUS & OUTCOMES) Tj
+0 -18 Td
+/F1 9 Tf
+(Logical Units: Algorithmic sequencing, pattern recognition, decomposition of 2-3) Tj
+0 -12 Td
+(step problems, basic 3D spatial reasoning \(cube viewpoints, mirror images\),) Tj
+0 -12 Td
+(block-based coding concepts.) Tj
+0 -14 Td
+/F1 9 Tf
+(AI Units: Introduction to AI - voice assistants, face recognition, YouTube) Tj
+0 -12 Td
+(recommendations, autocomplete. How AI learns from examples vs how regular) Tj
+0 -12 Td
+(programs work.) Tj
+0 -14 Td
+/F1 9 Tf
+(Sample Question: A computer is given the rule: IF number is even, PRINT EVEN. IF) Tj
+0 -12 Td
+(number is odd, PRINT ODD. For 7, what does it print?) Tj
+0 -14 Td
+0 -10 Td
+/F1 13 Tf
+(3. GRADE 4 SYLLABUS & OUTCOMES) Tj
+0 -18 Td
+/F1 9 Tf
+(Logical Units: Flowcharts with YES/NO decision diamonds, input-output function) Tj
+0 -12 Td
+(rules, multi-step decomposition, mirror images and symmetry, grid movements,) Tj
+0 -12 Td
+(loop patterns.) Tj
+0 -14 Td
+/F1 9 Tf
+(AI Units: Training data and supervised learning. Why spam filters work. How) Tj
+0 -12 Td
+(IRCTC AI detects fraud bots. Differences between AI and automation.) Tj
+0 -14 Td
+/F1 9 Tf
+(Sample Question: An AI recommends "Study more" IF exam is tomorrow AND score <) Tj
+0 -12 Td
+(70. Rohan's exam is tomorrow and his score is 65. What does the AI recommend?) Tj
+0 -14 Td
+0 -10 Td
+/F1 13 Tf
+(4. GRADE 5 SYLLABUS & OUTCOMES) Tj
+0 -18 Td
+/F1 9 Tf
+(Logical Units: Decision trees with 2^n path counting, multi-rule patterns,) Tj
+0 -12 Td
+(pictorial decomposition, water images vs mirror images, combined) Tj
+0 -12 Td
+(transformations, Caesar cipher basics.) Tj
+0 -14 Td
+/F1 9 Tf
+(AI Units: All three AI learning types - supervised, unsupervised, reinforcement.) Tj
+0 -12 Td
+(Deep learning basics. AI4Bharat and IndicTrans2. AI bias - why training data) Tj
+0 -12 Td
+(matters.) Tj
+0 -14 Td
+/F1 9 Tf
+(Sample Question: A table shows rainfall and crop yield over 4 years. More rain =) Tj
+0 -12 Td
+(more yield. What AI technique models this relationship? Predict yield for 300mm) Tj
+0 -12 Td
+(rain.) Tj
+0 -14 Td
+0 -10 Td
+ET
+
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000220 00000 n 
+0000000302 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+3068
+%%EOF

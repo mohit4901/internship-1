@@ -25,10 +25,10 @@ export default function Hero() {
       <div className="absolute top-1/3 right-10 w-96 h-96 rounded-full bg-brand-green/10 blur-3xl pointer-events-none z-[2]" />
 
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
-        
+
         {/* ── Left Column: Content ── */}
         <div className="lg:col-span-7 space-y-8 text-left">
-          
+
           {/* Tagline Badge */}
           <div className="inline-flex items-center gap-2 bg-brand-navy border border-slate-800 rounded-full px-4 py-2 hover:border-brand-orange/40 transition-colors duration-300">
             <BookOpen className="w-3.5 h-3.5 text-brand-orange" />
@@ -91,13 +91,13 @@ export default function Hero() {
 
         {/* ── Right Column: Interactive Visual ── */}
         <div className="lg:col-span-5 flex justify-center relative">
-          
+
           {/* Decorative Back Gradients */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-brand-orange/5 rounded-full blur-3xl z-0 animate-pulse-slow" />
-          
+
           {/* Main Floating Glass Panel */}
           <div className="w-full max-w-sm glass-card rounded-3xl p-6 relative z-10 glow-orange animate-float overflow-hidden border border-white/10">
-            
+
             {/* Glossy Overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none" />
 

@@ -23,6 +23,9 @@ const {
   getParticipants,
   getSchoolParticipantsAdmin,
   listAllParticipantsAdmin,
+  uploadParticipantsFile,
+  getSchoolResults,
+  getSchoolResultsAdmin,
 } = require('../controllers/school.controller');
 
 // Middleware
@@ -32,6 +35,7 @@ const {
   requirePermission,
 } = require('../middlewares/auth.middleware');
 const { validate } = require('../middlewares/validate.middleware');
+const { upload } = require('../middlewares/multer.middleware');
 
 // Validators
 const {
@@ -58,8 +62,14 @@ router.patch('/me', protectSchool, validate(updateSchoolProfileSchema), updateOw
 // POST /api/v1/schools/me/participants  — submit a batch of students
 router.post('/me/participants', protectSchool, addParticipants);
 
+// POST /api/v1/schools/me/participants/upload — upload file (excel/pdf) of students
+router.post('/me/participants/upload', protectSchool, upload.single('file'), uploadParticipantsFile);
+
 // GET  /api/v1/schools/me/participants  — list submitted participants
 router.get('/me/participants', protectSchool, getParticipants);
+
+// GET  /api/v1/schools/me/results — get results and aggregated analytics
+router.get('/me/results', protectSchool, getSchoolResults);
 
 /* ══════════════════════════════════════════════════════════════════════════════
    ADMIN ROUTES
@@ -88,6 +98,14 @@ router.get(
   protectAdmin,
   requirePermission('users:read'),
   getSchoolParticipantsAdmin
+);
+
+// GET /api/v1/schools/:id/results — list school performance analytics (Admin)
+router.get(
+  '/:id/results',
+  protectAdmin,
+  requirePermission('users:read'),
+  getSchoolResultsAdmin
 );
 
 // GET /api/v1/schools/:id
