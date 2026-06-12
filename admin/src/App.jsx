@@ -805,19 +805,19 @@ function SchoolsPage() {
                 className="text-left font-bold text-[#001F5E] hover:text-brand-orange hover:underline cursor-pointer flex items-center gap-1.5"
                 title="Click to view full details"
               >
-                <Eye className="w-3.5 h-3.5 text-slate-405 shrink-0" />
+                <Eye className="w-3.5 h-3.5 text-brand-navy/60 shrink-0" />
                 <span>{s.name}</span>
               </button>
             </td>
             <td className="py-3.5 pr-4">
               <span className="badge-blue inline-block px-2 py-0.5 rounded-full text-[10px] font-bold">{s.board}</span>
             </td>
-            <td className="py-3.5 pr-4 text-slate-400">{s.address?.city || '—'}</td>
-            <td className="py-3.5 pr-4 text-slate-400">{s.address?.state || '—'}</td>
+            <td className="py-3.5 pr-4 text-slate-700 font-semibold">{s.address?.city || '—'}</td>
+            <td className="py-3.5 pr-4 text-slate-700 font-semibold">{s.address?.state || '—'}</td>
             <td className="py-3.5 pr-4">
               <button
                 onClick={() => setSelectedSchoolForParticipants(s)}
-                className="text-blue-500 hover:text-blue-600 hover:underline font-extrabold cursor-pointer"
+                className="text-blue-600 hover:text-brand-orange hover:underline font-black cursor-pointer"
               >
                 {fmt(s.registeredStudentsCount)} Students
               </button>
@@ -889,71 +889,71 @@ function SchoolsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Section 1: Institution Info */}
               <div className="space-y-3">
-                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-1">
+                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-150 pb-1">
                   Institution Info
                 </h5>
                 <div className="space-y-2 text-xs">
                   <div>
-                    <span className="text-slate-400 font-bold">Principal Name:</span>
-                    <p className="text-slate-850 font-semibold">{selectedSchoolForDetails.principalName || '—'}</p>
+                    <span className="text-slate-500 font-extrabold">Principal Name:</span>
+                    <p className="text-slate-800 font-bold">{selectedSchoolForDetails.principalName || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold">Primary Email:</span>
-                    <p className="text-slate-850 font-semibold">{selectedSchoolForDetails.contactEmail || '—'}</p>
+                    <span className="text-slate-500 font-extrabold">Primary Email:</span>
+                    <p className="text-slate-800 font-bold">{selectedSchoolForDetails.contactEmail || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold">Primary Phone:</span>
-                    <p className="text-slate-850 font-semibold font-mono">{selectedSchoolForDetails.contactPhone || '—'}</p>
+                    <span className="text-slate-500 font-extrabold">Primary Phone:</span>
+                    <p className="text-slate-800 font-bold font-mono">{selectedSchoolForDetails.contactPhone || '—'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Section 2: Coordinator Details */}
               <div className="space-y-3">
-                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-1">
+                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-150 pb-1">
                   Coordinator Details
                 </h5>
                 <div className="space-y-2 text-xs">
                   <div>
-                    <span className="text-slate-400 font-bold">Coordinator Name:</span>
-                    <p className="text-slate-855 font-semibold">{selectedSchoolForDetails.coordinator?.name || '—'}</p>
+                    <span className="text-slate-500 font-extrabold">Coordinator Name:</span>
+                    <p className="text-slate-800 font-bold">{selectedSchoolForDetails.coordinator?.name || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold">Coordinator Email:</span>
-                    <p className="text-slate-855 font-semibold">{selectedSchoolForDetails.coordinator?.email || '—'}</p>
+                    <span className="text-slate-500 font-extrabold">Coordinator Email:</span>
+                    <p className="text-slate-800 font-bold">{selectedSchoolForDetails.coordinator?.email || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-slate-400 font-bold">Coordinator Phone:</span>
-                    <p className="text-slate-855 font-semibold font-mono">{selectedSchoolForDetails.coordinator?.phone || '—'}</p>
+                    <span className="text-slate-500 font-extrabold">Coordinator Phone:</span>
+                    <p className="text-slate-800 font-bold font-mono">{selectedSchoolForDetails.coordinator?.phone || '—'}</p>
                   </div>
                 </div>
               </div>
 
               {/* Section 3: Address Details */}
               <div className="space-y-3 md:col-span-2">
-                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-1">
+                <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-150 pb-1">
                   Geographical Location
                 </h5>
-                <div className="space-y-2.5 text-xs text-slate-800 font-semibold">
+                <div className="space-y-2.5 text-xs text-slate-800 font-bold">
                   <div>
-                    <span className="text-slate-400 font-bold">Street Address:</span>
+                    <span className="text-slate-500 font-extrabold">Street Address:</span>
                     <p>{selectedSchoolForDetails.address?.street || '—'}</p>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div>
-                      <span className="text-slate-400 font-bold">City:</span>
+                      <span className="text-slate-500 font-extrabold">City:</span>
                       <p>{selectedSchoolForDetails.address?.city || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-bold">State:</span>
+                      <span className="text-slate-500 font-extrabold">State:</span>
                       <p>{selectedSchoolForDetails.address?.state || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-bold">ZIP Code:</span>
+                      <span className="text-slate-500 font-extrabold">ZIP Code:</span>
                       <p className="font-mono">{selectedSchoolForDetails.address?.zip || '—'}</p>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-bold">Country:</span>
+                      <span className="text-slate-500 font-extrabold">Country:</span>
                       <p>{selectedSchoolForDetails.address?.country || 'India'}</p>
                     </div>
                   </div>
@@ -1096,11 +1096,11 @@ function SchoolsPage() {
                   })
                   .map(p => (
                     <tr key={p._id}>
-                      <td className="py-2.5 pr-4 font-semibold text-slate-800">{p.name}</td>
-                      <td className="py-2.5 pr-4 text-slate-600">Class {p.class}</td>
-                      <td className="py-2.5 pr-4 text-slate-555">{p.section || '—'}</td>
-                      <td className="py-2.5 pr-4 font-mono text-[10px] text-slate-650">{p.rollNo || '—'}</td>
-                      <td className="py-2.5 pr-4 text-slate-550">{p.gender || '—'}</td>
+                      <td className="py-2.5 pr-4 font-bold text-[#001F5E]">{p.name}</td>
+                      <td className="py-2.5 pr-4 text-slate-700">Class {p.class}</td>
+                      <td className="py-2.5 pr-4 text-slate-700">{p.section || '—'}</td>
+                      <td className="py-2.5 pr-4 font-mono text-xs text-slate-600">{p.rollNo || '—'}</td>
+                      <td className="py-2.5 pr-4 text-slate-700">{p.gender || '—'}</td>
                       <td className="py-2.5 pr-4">
                         <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           p.division === 'Junior' ? 'badge-green' : 'badge-indigo'
